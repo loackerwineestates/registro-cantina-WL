@@ -1,0 +1,3525 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#5b1a1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Registro Cantina WL">
+<link rel="manifest" href="manifest.json">
+<title>Registro Cantina WL</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f4f1ed; color: #2b1a14; min-height: 100vh;
+  }
+  header {
+    background: #5b1a1a; color: #f4e9d8;
+    padding: 14px 18px;
+    position: sticky; top: 0; z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }
+  header h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: .3px; }
+  header .subtitle { font-size: 12px; opacity: .8; margin-top: 2px; }
+  .tabs {
+    display: flex; background: #fff; border-bottom: 1px solid #e0d7cc;
+    position: sticky; top: 53px; z-index: 9;
+  }
+  .tab {
+    flex: 1; padding: 13px 0; text-align: center;
+    font-size: 14px; font-weight: 500; color: #8a7868;
+    border-bottom: 3px solid transparent; cursor: pointer; transition: all .15s;
+  }
+  .tab.active { color: #5b1a1a; border-bottom-color: #5b1a1a; }
+  main { padding: 16px; padding-bottom: 100px; }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: #6b5444; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 12px 14px;
+    border: 1px solid #d6cabb; border-radius: 10px;
+    font-size: 16px; background: #fff; color: #2b1a14; font-family: inherit;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none; border-color: #5b1a1a;
+    box-shadow: 0 0 0 3px rgba(91, 26, 26, .12);
+  }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .row { display: flex; gap: 10px; }
+  .row .field { flex: 1; }
+  .btn {
+    display: block; width: 100%; padding: 14px;
+    border: none; border-radius: 10px; font-size: 16px;
+    font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .btn-primary { background: #5b1a1a; color: #f4e9d8; }
+  .btn-primary:active { background: #3d1010; }
+  .btn-secondary { background: #fff; color: #5b1a1a; border: 1px solid #d6cabb; }
+  .btn-ghost { background: transparent; color: #8a7868; font-weight: 500; font-size: 14px; }
+
+  /* Vasca picker */
+  .picker-btn {
+    width: 100%; padding: 12px 14px; border: 1px solid #d6cabb;
+    border-radius: 10px; background: #fff; color: #2b1a14;
+    font-size: 15px; text-align: left; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: inherit;
+  }
+  .picker-btn.placeholder { color: #a89a8a; }
+  .picker-btn:after { content: '＋'; color: #5b1a1a; font-weight: 600; }
+  .vasche-chips {
+    display: flex; flex-direction: column; gap: 6px; margin-top: 8px;
+  }
+  .vasca-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: #fff; border: 1px solid #d6cabb;
+    border-left-width: 4px;
+    border-radius: 8px; padding: 8px 10px;
+    font-size: 14px; color: #2b1a14;
+    flex-wrap: wrap;
+  }
+  .vasca-chip.arrivo { border-left-color: #2d6b3e; background: #f0f7f1; }
+  .vasca-chip.partenza { border-left-color: #5b1a1a; background: #faf3f0; }
+  .vasca-chip .code { font-weight: 700; min-width: 60px; }
+  .vasca-chip .cap-ref {
+    color: #8a7868; font-size: 11px;
+  }
+  .vasca-chip .qta-wrap {
+    margin-left: auto; display: flex; align-items: center; gap: 4px;
+  }
+  .vasca-chip .qta-input {
+    width: 80px; padding: 5px 8px; font-size: 14px;
+    border: 1px solid #d6cabb; border-radius: 6px;
+    background: #fff; color: #2b1a14;
+    text-align: right; font-family: inherit;
+  }
+  .vasca-chip .qta-input:focus {
+    outline: none; border-color: #5b1a1a;
+    box-shadow: 0 0 0 2px rgba(91, 26, 26, .12);
+  }
+  .vasca-chip .unit { font-size: 12px; color: #6b5444; font-weight: 600; }
+  .vasca-chip .x {
+    background: rgba(0,0,0,.08); color: #2b1a14;
+    border: none; border-radius: 50%;
+    width: 22px; height: 22px; font-size: 14px; line-height: 1;
+    cursor: pointer; padding: 0;
+  }
+  .vasca-chip-warn {
+    flex: 1 1 100%;
+    font-size: 11px; font-weight: 600;
+    padding: 4px 8px; border-radius: 6px;
+    margin-top: -2px;
+  }
+  .vasca-chip-warn.warn-under {
+    background: #fcefe9; color: #a04040;
+  }
+  .vasca-chip-warn.warn-over {
+    background: #fdf2d0; color: #7a5a00;
+  }
+  .vasca-chip-warn.warn-ok {
+    background: #e8f4ec; color: #2d6b3e;
+  }
+
+  .vasche-total {
+    margin-top: 6px; padding: 8px 12px;
+    background: #faf6f0; border-radius: 8px;
+    font-size: 13px; color: #6b5444;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .vasche-total strong { font-size: 15px; color: #2b1a14; }
+  .vasche-total.ok { background: #e8f4ec; color: #2d6b3e; }
+  .vasche-total.ok strong { color: #2d6b3e; }
+  .vasche-total.warn { background: #fcefe9; color: #a04040; }
+  .vasche-total.warn strong { color: #a04040; }
+  .balance-hint {
+    font-size: 11px; opacity: .85; margin-top: 2px;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    z-index: 100; display: none; align-items: flex-end;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: #f4f1ed; width: 100%; max-height: 85vh;
+    border-radius: 16px 16px 0 0;
+    display: flex; flex-direction: column;
+    animation: slideUp .25s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-head {
+    padding: 14px 16px; border-bottom: 1px solid #e0d7cc;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .modal-head h3 { margin: 0; font-size: 16px; flex: 1; }
+  .modal-head .count {
+    background: #5b1a1a; color: #f4e9d8;
+    font-size: 12px; padding: 2px 8px; border-radius: 10px;
+  }
+  .modal-close {
+    background: none; border: none; font-size: 22px; color: #6b5444;
+    cursor: pointer; padding: 4px 8px;
+  }
+  .modal-search {
+    padding: 10px 16px; background: #f4f1ed;
+    border-bottom: 1px solid #e0d7cc;
+    position: sticky; top: 0;
+  }
+  .modal-search input {
+    width: 100%; padding: 10px 14px;
+    border: 1px solid #d6cabb; border-radius: 8px;
+    font-size: 16px; background: #fff;
+  }
+  .modal-filters {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 10px 16px 12px;
+    border-bottom: 1px solid #e0d7cc;
+    background: #faf6ef;
+  }
+  .modal-filters .chip {
+    padding: 6px 12px; font-size: 13px;
+  }
+  .modal-body { flex: 1; overflow-y: auto; padding: 4px 0; }
+  .modal-foot {
+    padding: 10px 16px; border-top: 1px solid #e0d7cc; background: #fff;
+  }
+  .picker-item {
+    padding: 12px 16px; border-bottom: 1px solid #ece4d8;
+    cursor: pointer; display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap;
+  }
+  .picker-item-wine {
+    flex: 1 1 100%;
+    font-size: 11px; color: #6b5444;
+    padding-left: 32px;
+    margin-top: -2px; line-height: 1.3;
+  }
+  .picker-item-wine .v-name { font-weight: 600; color: #5b1a1a; }
+  .picker-item-wine .v-sep  { color: #c4b6a5; margin: 0 4px; }
+  .picker-item-wine .v-orig { font-family: Consolas, ui-monospace, monospace; }
+  .picker-item:active { background: #ede2d0; }
+  .picker-item.selected { background: #f8edec; }
+  .picker-item .check {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid #d6cabb;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; font-weight: 700;
+  }
+  .picker-item.selected .check { background: #5b1a1a; border-color: #5b1a1a; }
+  .picker-item .code {
+    font-weight: 700; color: #5b1a1a; font-size: 15px; min-width: 70px;
+  }
+  .picker-item .meta { flex: 1; font-size: 13px; color: #6b5444; }
+  .picker-item .cap {
+    font-size: 13px; font-weight: 600; color: #2b1a14;
+    background: #ede2d0; padding: 3px 8px; border-radius: 4px;
+  }
+  .picker-item .fill-badge {
+    font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 12px;
+    white-space: nowrap;
+    text-transform: uppercase; letter-spacing: .3px;
+  }
+  .picker-item .fill-badge.vuota  { background: #e8f4ec; color: #2d6b3e; }
+  .picker-item .fill-badge.scolma { background: #fdf2d0; color: #7a5a00; }
+  .picker-item .fill-badge.piena  { background: #f8edec; color: #a04040; }
+  .picker-item .fill-badge.errore { background: #a04040; color: #fff; }
+  .picker-item.disabled { opacity: .55; cursor: not-allowed; }
+  .picker-item.disabled:active { background: inherit; }
+  .picker-empty { padding: 30px; text-align: center; color: #8a7868; }
+  .group-head {
+    padding: 8px 16px 4px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .5px; color: #8a7868;
+    background: #ede4d6;
+  }
+
+  /* Travaso visual hint */
+  .travaso-hint {
+    background: linear-gradient(90deg, #f8edec 0%, #e8f4ec 100%);
+    border-radius: 8px; padding: 8px 12px;
+    font-size: 12px; color: #6b5444;
+    margin-bottom: 14px; text-align: center;
+  }
+
+  /* Photos */
+  .photo-btn {
+    background: #fff; border: 1px dashed #b8a692; color: #6b5444;
+    padding: 16px; border-radius: 10px; text-align: center;
+    cursor: pointer; font-size: 14px;
+  }
+  .photo-preview {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 6px; margin-top: 8px;
+  }
+  .photo-preview img {
+    width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px;
+  }
+  .photo-preview .remove {
+    position: absolute; top: 2px; right: 2px;
+    background: rgba(0,0,0,.6); color: #fff; border: none;
+    width: 20px; height: 20px; border-radius: 50%;
+    font-size: 12px; line-height: 1; cursor: pointer;
+  }
+  .photo-item { position: relative; }
+
+  /* Entry cards */
+  .entry {
+    background: #fff; border-radius: 12px; padding: 14px;
+    margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  }
+  .entry-head {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; margin-bottom: 6px; gap: 8px;
+  }
+  .entry-type {
+    background: #5b1a1a; color: #f4e9d8;
+    font-size: 11px; font-weight: 600; padding: 3px 8px;
+    border-radius: 4px; text-transform: uppercase; letter-spacing: .5px;
+  }
+  .entry-date { font-size: 12px; color: #8a7868; white-space: nowrap; }
+  .entry-flow {
+    background: #faf6f0; border-radius: 8px;
+    padding: 8px 10px; margin: 6px 0;
+    font-size: 14px;
+  }
+  .entry-flow .row-line {
+    display: flex; gap: 6px; align-items: flex-start; margin: 2px 0;
+  }
+  .entry-flow .label {
+    font-size: 10px; font-weight: 700; color: #8a7868;
+    text-transform: uppercase; min-width: 50px; padding-top: 3px;
+  }
+  .entry-flow .vasche {
+    flex: 1; font-weight: 600; color: #2b1a14;
+  }
+  .entry-meta { font-size: 13px; color: #6b5444; }
+  .entry-notes { font-size: 13px; color: #2b1a14; margin-top: 6px; font-style: italic; }
+  .entry-photos { display: flex; gap: 4px; margin-top: 8px; overflow-x: auto; }
+  .entry-photos img {
+    height: 60px; width: 60px; object-fit: cover; border-radius: 4px; flex-shrink: 0;
+  }
+  .entry-actions {
+    display: flex; gap: 8px; margin-top: 10px;
+    padding-top: 10px; border-top: 1px solid #f0e9e0;
+  }
+  .entry-actions button {
+    background: none; border: none; color: #8a7868;
+    font-size: 13px; cursor: pointer; padding: 4px 0;
+  }
+  .entry-actions .delete { color: #a04040; }
+  .empty { text-align: center; padding: 60px 20px; color: #8a7868; }
+  .empty .icon { font-size: 48px; margin-bottom: 12px; opacity: .4; }
+  .toast {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    background: #2b1a14; color: #f4e9d8;
+    padding: 12px 20px; border-radius: 24px;
+    font-size: 14px; opacity: 0;
+    transition: opacity .25s, transform .25s;
+    pointer-events: none; z-index: 200;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+  .hidden { display: none !important; }
+  .stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin-bottom: 16px;
+  }
+  .stat {
+    background: #fff; border-radius: 10px;
+    padding: 12px; text-align: center;
+  }
+  .stat-num { font-size: 22px; font-weight: 700; color: #5b1a1a; }
+  .stat-lbl { font-size: 11px; color: #8a7868; text-transform: uppercase; letter-spacing: .3px; }
+  .filter-bar {
+    display: flex; gap: 8px; margin-bottom: 12px;
+    overflow-x: auto; padding-bottom: 4px;
+  }
+  .chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #fff; border: 1px solid #d6cabb; color: #5b1a1a;
+    padding: 8px 18px; border-radius: 18px;
+    font-size: 14px; font-weight: 600;
+    white-space: nowrap; cursor: pointer;
+    flex: 0 0 auto;
+    width: max-content;
+    line-height: 1.2;
+    box-sizing: content-box;
+  }
+  .chip:hover { background: #f8f2e8; }
+  .chip.active { background: #5b1a1a; color: #f4e9d8; border-color: #5b1a1a; }
+
+  /* Prodotti chips */
+  .prodotti-chips {
+    display: flex; flex-direction: column; gap: 8px; margin-top: 8px;
+  }
+  .prodotto-chip {
+    background: #fff; border: 1px solid #d6cabb;
+    border-left: 4px solid #5b1a1a;
+    border-radius: 10px; padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .prodotto-chip .name {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 14px; font-weight: 600; color: #2b1a14;
+  }
+  .prodotto-chip .name .gruppo {
+    font-size: 10px; font-weight: 500; text-transform: uppercase;
+    background: #ede2d0; color: #6b5444; padding: 2px 6px;
+    border-radius: 4px; letter-spacing: .3px;
+  }
+  .prodotto-chip .name .gruppo.cartoni {
+    background: #d6e8da; color: #2d6b3e;
+  }
+  .prodotto-chip .name .gruppo.chiarificanti {
+    background: #dbe6f0; color: #3a5870;
+  }
+  .prodotto-chip .name .x {
+    background: rgba(0,0,0,.08); color: #2b1a14;
+    border: none; border-radius: 50%;
+    width: 22px; height: 22px; font-size: 14px; line-height: 1;
+    cursor: pointer; padding: 0; margin-left: auto;
+  }
+  .prodotto-chip .qta-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 0;
+  }
+  .prodotto-chip .qta-row .qlabel {
+    min-width: 56px;
+    font-size: 11px; font-weight: 700;
+    color: #8a7868; text-transform: uppercase; letter-spacing: .3px;
+  }
+  .prodotto-chip .qta-row input {
+    width: 90px; padding: 6px 8px; font-size: 14px;
+    border: 1px solid #d6cabb; border-radius: 6px;
+    background: #faf6f0; text-align: right;
+    font-family: inherit;
+  }
+  .prodotto-chip .qta-row input:focus {
+    outline: none; border-color: #5b1a1a;
+    box-shadow: 0 0 0 2px rgba(91, 26, 26, .12);
+  }
+  .prodotto-chip .qta-row select {
+    padding: 6px 8px; font-size: 14px;
+    border: 1px solid #d6cabb; border-radius: 6px;
+    background: #faf6f0; color: #2b1a14;
+    font-family: inherit;
+  }
+  .prodotto-chip .qta-row .unit-static {
+    padding: 6px 8px; font-size: 14px; font-weight: 600;
+    color: #6b5444;
+  }
+  .prodotto-chip .qta-row .arrow {
+    font-size: 12px; color: #8a7868; margin: 0 -2px;
+  }
+  .prodotto-chip .volume-note {
+    font-size: 11px; color: #8a7868; padding-left: 56px;
+    margin-top: -2px;
+  }
+
+
+  .stats-4 { grid-template-columns: repeat(4, 1fr); }
+  .stats-4 .stat { padding: 10px 6px; }
+  .stats-4 .stat-num { font-size: 18px; }
+  .stat.stat-pending { background: #f8edec; }
+  .stat.stat-pending .stat-num { color: #a04040; }
+  .stat.stat-pending.empty { background: #e8f4ec; }
+  .stat.stat-pending.empty .stat-num { color: #2d6b3e; }
+  .entry-pending-badge {
+    background: #f8edec; color: #a04040;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 6px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: .3px;
+    margin-left: 6px;
+  }
+  /* Sync section */
+  .sync-section {
+    background: linear-gradient(135deg, #5b1a1a 0%, #7a2828 100%);
+    color: #f4e9d8; border-radius: 12px;
+    padding: 16px; margin-bottom: 16px;
+  }
+  .sync-section h3 {
+    margin: 0 0 4px 0; font-size: 16px; font-weight: 600;
+  }
+  .sync-section .desc { font-size: 13px; opacity: .85; margin-bottom: 12px; }
+  .sync-section .pending-count {
+    font-size: 28px; font-weight: 700; line-height: 1; margin: 8px 0 12px;
+  }
+  .sync-section .btn-send {
+    background: #f4e9d8; color: #5b1a1a; border: none;
+    width: 100%; padding: 13px; border-radius: 8px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  .sync-section .btn-send:disabled {
+    background: rgba(244, 233, 216, .4); cursor: default;
+  }
+  .sync-section .email-row {
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid rgba(244, 233, 216, .2);
+  }
+  .sync-section .email-row label {
+    display: block; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .5px;
+    margin-bottom: 6px; opacity: .8;
+  }
+  .sync-section .email-row input {
+    width: 100%; padding: 10px 12px; border: none;
+    border-radius: 6px; font-size: 14px;
+    background: rgba(244, 233, 216, .95); color: #2b1a14;
+  }
+  .sync-section .reset-link {
+    background: none; border: none; color: #f4e9d8;
+    opacity: .7; font-size: 12px; cursor: pointer;
+    text-decoration: underline; padding: 6px 0; margin-top: 4px;
+  }
+
+
+  /* Stato vasche */
+  .stato-summary {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    background: #fff; border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 14px;
+    font-size: 13px; color: #6b5444;
+  }
+  .stato-summary .pill-stat {
+    display: inline-flex; align-items: baseline; gap: 6px;
+  }
+  .stato-summary .pill-stat strong {
+    color: #5b1a1a; font-size: 18px; font-weight: 700;
+  }
+  .stato-summary .pill-stat.err strong { color: #a04040; }
+  .stato-summary .pill-stat.warn strong { color: #b07020; }
+
+  .vasca-card {
+    background: #fff; border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    border-left: 4px solid #5b1a1a;
+  }
+  .vasca-card.full { border-left-color: #b07020; }
+  .vasca-card.overfull { border-left-color: #a04040; }
+  .vasca-card.vuota {
+    border-left-color: #d6cabb;
+    background: #faf8f4;
+    padding: 8px 14px;
+  }
+  .vasca-card.vuota .v-code { color: #8a7868; }
+  .vasca-card.vuota .v-qta { color: #8a7868; font-size: 13px; }
+  .vasca-card.vuota .v-meta { margin-top: 4px; }
+  .vasca-card-head {
+    display: flex; justify-content: space-between;
+    align-items: baseline; gap: 8px;
+  }
+  .vasca-card .v-code {
+    font-size: 17px; font-weight: 700; color: #5b1a1a;
+  }
+  .vasca-card .v-qta {
+    font-size: 14px; color: #2b1a14;
+    font-variant-numeric: tabular-nums;
+  }
+  .vasca-card .v-qta .pct {
+    font-size: 12px; color: #6b5444; margin-left: 4px;
+  }
+  .vasca-card .v-vino {
+    font-weight: 600; color: #2b1a14; font-size: 15px;
+    margin-top: 4px;
+  }
+  .vasca-card .v-vino .annata {
+    color: #6b5444; font-weight: 500; margin-left: 6px;
+  }
+  .colore-chip {
+    display: inline-block; font-size: 10px;
+    font-weight: 700; text-transform: uppercase;
+    letter-spacing: .5px; padding: 2px 7px;
+    border-radius: 4px; margin-right: 6px;
+    vertical-align: 2px;
+  }
+  .colore-chip.bianco { background: #f5ecc8; color: #7a5a00; }
+  .colore-chip.rosato { background: #f5d6dc; color: #9a3550; }
+  .colore-chip.rosso  { background: #5b1a1a; color: #f4e9d8; }
+  .vasca-card .v-origine {
+    font-family: Consolas, ui-monospace, monospace;
+    font-size: 13px; color: #6b5444; margin-top: 2px;
+  }
+  .vasca-card .v-stato {
+    font-size: 12px; color: #5b1a1a;
+    background: #f8edec; border-radius: 4px;
+    padding: 2px 8px; margin-top: 4px;
+    display: inline-block; font-weight: 600;
+  }
+  .vasca-card .v-meta {
+    font-size: 12px; color: #8a7868; margin-top: 6px;
+  }
+  .vasca-card .v-bar {
+    height: 4px; background: #f0e6dc;
+    border-radius: 2px; overflow: hidden; margin-top: 8px;
+  }
+  .vasca-card .v-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6b8e4e, #5b8e4e);
+    transition: width .25s;
+  }
+  .vasca-card.full .v-bar-fill {
+    background: linear-gradient(90deg, #d4a02a, #b07020);
+  }
+  .vasca-card.overfull .v-bar-fill {
+    background: linear-gradient(90deg, #c04040, #a04040);
+  }
+  .stato-section-title {
+    font-size: 12px; font-weight: 700; color: #6b5444;
+    text-transform: uppercase; letter-spacing: .5px;
+    margin: 16px 0 8px;
+  }
+  .linea-row {
+    display: flex; justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 12px; background: #fff;
+    border-radius: 8px; margin-bottom: 6px; font-size: 14px;
+  }
+  .linea-row .l-name { color: #2b1a14; font-weight: 600; }
+  .linea-row .l-meta { font-size: 12px; color: #8a7868; }
+  .linea-row .l-qta {
+    color: #5b1a1a; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .warnings-banner {
+    background: #fdf2d0; color: #7a5a00;
+    border-radius: 8px; padding: 8px 12px;
+    font-size: 13px; margin-bottom: 12px;
+    border-left: 3px solid #b07020;
+  }
+  .warnings-banner.err {
+    background: #fcefe9; color: #a04040;
+    border-left-color: #a04040;
+  }
+  .warnings-banner ul { margin: 4px 0 0; padding-left: 18px; }
+  .warnings-banner li { margin: 2px 0; }
+
+  /* Codice origine wizard */
+  .codice-row { display: flex; gap: 6px; align-items: stretch; }
+  .codice-row input { flex: 1; }
+  .codice-wiz-btn {
+    background: #5b1a1a; color: #f4e9d8; border: none;
+    border-radius: 10px; padding: 0 14px; font-size: 18px;
+    cursor: pointer; font-family: inherit;
+  }
+  .codice-wiz-btn:active { background: #3d1010; }
+
+  .wiz-section {
+    background: #fff; border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 10px;
+  }
+  .wiz-section h4 {
+    margin: 0 0 8px 0; font-size: 12px;
+    color: #6b5444; text-transform: uppercase;
+    letter-spacing: .5px; font-weight: 700;
+  }
+  .wiz-section .step-num {
+    background: #5b1a1a; color: #f4e9d8;
+    font-size: 11px; padding: 1px 6px;
+    border-radius: 4px; margin-right: 4px;
+  }
+  .wiz-section input, .wiz-section select {
+    width: 100%; padding: 10px 12px; font-size: 16px;
+    border: 1px solid #d6cabb; border-radius: 8px;
+    background: #faf6f0;
+  }
+  .wiz-section .row { display: flex; gap: 8px; }
+  .wiz-section .row > * { flex: 1; }
+
+  .toggle-pills {
+    display: flex; gap: 6px; margin-bottom: 8px;
+  }
+  .toggle-pills .pill {
+    flex: 1; padding: 8px 12px; border-radius: 6px;
+    background: #f4f1ed; color: #6b5444;
+    border: 1px solid #d6cabb; cursor: pointer;
+    text-align: center; font-size: 13px;
+  }
+  .toggle-pills .pill.active {
+    background: #5b1a1a; color: #f4e9d8; border-color: #5b1a1a;
+  }
+
+  .aggiunte-chips {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 8px;
+  }
+  .aggiunta-chip {
+    background: #5b1a1a; color: #f4e9d8;
+    border-radius: 14px; padding: 4px 4px 4px 10px;
+    font-size: 13px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .aggiunta-chip .x {
+    background: rgba(255,255,255,.2); color: #f4e9d8;
+    border: none; border-radius: 50%;
+    width: 18px; height: 18px; font-size: 12px;
+    cursor: pointer; padding: 0; line-height: 1;
+  }
+  .aggiunta-add {
+    background: #faf6f0; color: #5b1a1a;
+    border: 1px dashed #b8a692; border-radius: 14px;
+    padding: 4px 10px; font-size: 12px; cursor: pointer;
+  }
+
+  .codice-preview {
+    background: linear-gradient(135deg, #5b1a1a 0%, #7a2828 100%);
+    color: #f4e9d8; border-radius: 12px;
+    padding: 14px; margin-bottom: 10px;
+    text-align: center;
+  }
+  .codice-preview .label {
+    font-size: 11px; opacity: .8; text-transform: uppercase;
+    letter-spacing: .5px; margin-bottom: 6px;
+  }
+  .codice-preview .code {
+    font-family: Consolas, monospace;
+    font-size: 22px; font-weight: 700;
+    word-break: break-all;
+  }
+  .codice-preview .code.empty {
+    color: rgba(244,233,216,.5); font-size: 14px; font-weight: 400;
+  }
+
+  /* Aggiunta picker sub-modal */
+  .agg-picker-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.6);
+    z-index: 150; display: none; align-items: flex-end;
+  }
+  .agg-picker-overlay.show { display: flex; }
+  .agg-picker-list {
+    background: #f4f1ed; max-height: 70vh; width: 100%;
+    border-radius: 16px 16px 0 0; overflow-y: auto;
+    padding: 16px;
+  }
+  .agg-picker-list .grp-h {
+    font-size: 11px; font-weight: 700;
+    color: #8a7868; text-transform: uppercase;
+    letter-spacing: .5px; padding: 10px 4px 6px;
+  }
+  .agg-picker-list .agg-item {
+    background: #fff; border: 1px solid #e0d7cc;
+    border-radius: 8px; padding: 10px 12px;
+    margin-bottom: 6px; cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .agg-picker-list .agg-item:active { background: #ede2d0; }
+  .agg-picker-list .agg-item.selected {
+    background: #f8edec; border-color: #5b1a1a;
+  }
+  .agg-picker-list .agg-item .code {
+    background: #5b1a1a; color: #f4e9d8;
+    padding: 3px 8px; border-radius: 4px;
+    font-family: Consolas, monospace;
+    font-weight: 700; font-size: 13px; min-width: 50px;
+    text-align: center;
+  }
+  .agg-picker-list .agg-item .desc {
+    flex: 1; font-size: 13px; color: #2b1a14;
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍷 Registro Cantina WL</h1>
+  <div class="subtitle">Weingut Loacker</div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="new">➕ Nuovo</div>
+  <div class="tab" data-tab="list">📋 Storico</div>
+  <div class="tab" data-tab="stato">🏛️ Giacenza</div>
+  <div class="tab" data-tab="export">📤 Esporta</div>
+</div>
+
+<main>
+
+  <!-- TAB NUOVO -->
+  <section id="tab-new">
+    <div class="field">
+      <label>Operazione</label>
+      <select id="f-op" onchange="onOpChange()">
+        <option value="">— Seleziona operazione —</option>
+        <optgroup label="TRAVASI">
+          <option value="T2A">Travaso secondario d'affinamento</option>
+          <option value="TML">Travaso post FML</option>
+          <option value="TCV">Travaso x Cambio Vasca</option>
+          <option value="TTA">Travaso x Taglio</option>
+          <option value="TFI">Travaso x Filtrazione</option>
+          <option value="TST">Travaso post stabil. tartarica</option>
+        </optgroup>
+        <optgroup label="TRAVASI VENDEMMIA">
+          <option value="TPF">Travaso pre FA</option>
+          <option value="SVI">Svinatura rosso</option>
+          <option value="TFA">Travaso post FA</option>
+          <option value="T1A">Travaso iniziale d'affinamento</option>
+        </optgroup>
+        <optgroup label="AGGIUNTE">
+          <option value="AGG">Aggiunta</option>
+          <option value="COL">Collaggio (SCHÖNEN)</option>
+          <option value="PSP">Preparazione Spumante</option>
+          <option value="SOV">Solfitazione Vino/Mosto</option>
+        </optgroup>
+        <optgroup label="SCARICHI">
+          <option value="SAC">Scarico x Autoconsumo</option>
+          <option value="SCD">Scarico x Conferimento Distilleria</option>
+          <option value="SCL">Scarico x Conto Lavorazione</option>
+          <option value="SEV">Scarico x Evaporazione</option>
+          <option value="SIM">Scarico x Imbottigliamento</option>
+          <option value="SPC">Scarico x Colmatura</option>
+          <option value="SPD">Scarico x Perdita di Lavorazione</option>
+          <option value="STS">Scarico x Trasferimento Sede</option>
+          <option value="SUA">Scarico x Uso Alternativo Sottoprodotti</option>
+          <option value="SVE">Scarico x Vendita</option>
+        </optgroup>
+        <optgroup label="OPERAZIONI senza movim.">
+          <option value="BAT">Bâtonnage</option>
+          <option value="MCO">Microossigenazione</option>
+          <option value="SBL">Solfitazione Botti legno</option>
+        </optgroup>
+        <optgroup label="CARICHI">
+          <option value="CAR">Carico</option>
+          <option value="COB">Carico da Conferimento di Uva Bianca</option>
+          <option value="CON">Carico da Conferimento di Uva Rossa</option>
+        </optgroup>
+        <optgroup label="SCRITTURE">
+          <option value="CDA">Cambio Dati</option>
+          <option value="DOC">Passaggio fra ATTO e DOC</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div id="travaso-hint" class="travaso-hint hidden">
+      🔀 Travaso: indica le vasche di partenza e quelle di arrivo
+    </div>
+
+    <div class="field">
+      <label id="lbl-partenza">🛢️ Vasche da scaricare</label>
+      <button type="button" class="picker-btn placeholder" id="btn-partenza" onclick="openVascaPicker('partenza')">
+        <span id="label-partenza">Tocca per scegliere…</span>
+      </button>
+      <div class="vasche-chips" id="chips-partenza"></div>
+      <div class="vasche-total hidden" id="total-partenza"></div>
+    </div>
+
+    <div class="field hidden" id="field-arrivo">
+      <label>🛢️ Vasche da caricare</label>
+      <button type="button" class="picker-btn placeholder" id="btn-arrivo" onclick="openVascaPicker('arrivo')">
+        <span id="label-arrivo">Tocca per scegliere…</span>
+      </button>
+      <div class="vasche-chips" id="chips-arrivo"></div>
+      <div class="vasche-total hidden" id="total-arrivo"></div>
+    </div>
+
+    <div class="field" id="field-stato">
+      <label>⚙️ Stato di lavorazione <span id="stato-mode-hint" style="font-weight:500;text-transform:none;font-size:11px;color:#8a7868;"></span></label>
+      <select id="f-stato">
+        <option value="">— Seleziona stato —</option>
+      </select>
+    </div>
+
+
+    <div class="field hidden" id="field-prodotti">
+      <label>🧪 Prodotti e materiali</label>
+      <button type="button" class="picker-btn placeholder" id="btn-prodotti" onclick="openProdottoPicker()">
+        <span id="label-prodotti">Tocca per scegliere…</span>
+      </button>
+      <div class="prodotti-chips" id="chips-prodotti"></div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Vino</label>
+        <select id="f-vino">
+          <option value="">— Nessuno —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Annata</label>
+        <select id="f-annata">
+          <option value="">—</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Codice origine</label>
+      <div class="codice-row">
+        <input type="text" id="f-codice" placeholder="es. 5LA105PI+BRF">
+        <button type="button" class="codice-wiz-btn" onclick="openCodiceWizard()" title="Componi guidato">🔧</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Data</label>
+        <input type="date" id="f-data">
+      </div>
+      <div class="field">
+        <label>Ora</label>
+        <input type="time" id="f-ora">
+      </div>
+    </div>
+
+
+
+    <div class="field">
+      <label>Operatore</label>
+      <input type="text" id="f-operatore" list="operatori-list" placeholder="Seleziona o digita…" autocomplete="off">
+      <datalist id="operatori-list">
+        <option value="Mattia Viscomi"></option>
+        <option value="Hayo Loacker"></option>
+      </datalist>
+    </div>
+
+    <div class="field">
+      <label>Note</label>
+      <textarea id="f-note" placeholder="Osservazioni, dosaggi, valori misurati…"></textarea>
+    </div>
+
+    <div class="field">
+      <label>Foto</label>
+      <input type="file" id="f-foto" accept="image/*" capture="environment" multiple class="hidden">
+      <div class="photo-btn" onclick="document.getElementById('f-foto').click()">
+        📷 Scatta o aggiungi foto
+      </div>
+      <div class="photo-preview" id="photo-preview"></div>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveEntry()">Salva registrazione</button>
+    <button class="btn btn-ghost" onclick="resetForm()" style="margin-top:6px;">Pulisci campi</button>
+  </section>
+
+  <!-- TAB LISTA -->
+  <section id="tab-list" class="hidden">
+    <div class="stats stats-4">
+      <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Totali</div></div>
+      <div class="stat"><div class="stat-num" id="stat-week">0</div><div class="stat-lbl">Settimana</div></div>
+      <div class="stat"><div class="stat-num" id="stat-today">0</div><div class="stat-lbl">Oggi</div></div>
+      <div class="stat stat-pending"><div class="stat-num" id="stat-pending">0</div><div class="stat-lbl">Da inviare</div></div>
+    </div>
+    <div class="filter-bar" id="filter-bar"></div>
+    <div id="entries-list"></div>
+  </section>
+
+  <!-- TAB STATO VASCHE -->
+  <section id="tab-stato" class="hidden">
+    <div id="stato-warnings"></div>
+    <div class="stato-summary" id="stato-summary"></div>
+    <div class="field">
+      <label>Cerca vasca, vino, annata, codice origine o colore</label>
+      <input type="text" id="stato-search" placeholder="es. S05 - Lagrein - 2025 - rosato" oninput="renderStato()">
+    </div>
+    <div class="filter-bar" id="stato-stato-bar"></div>
+    <div class="filter-bar" id="stato-ubicazione-bar"></div>
+    <div class="filter-bar" id="stato-filter-bar"></div>
+    <div id="stato-list"></div>
+    <div class="stato-section-title">Totali per linea prodotto</div>
+    <div id="stato-totali-linea"></div>
+  </section>
+
+  <!-- TAB EXPORT -->
+  <section id="tab-export" class="hidden">
+    <div class="sync-section">
+      <h3>📤 Sincronizza su Google Sheet</h3>
+      <div class="desc">Invio diretto al foglio "Registro Cantina" — serve connessione internet.</div>
+      <div class="pending-count" id="sync-pending">0 da inviare</div>
+      <button class="btn-send" id="btn-send" onclick="sendToExcel()">Invia ora</button>
+      <button class="btn-send" id="btn-fetch" onclick="fetchFromSheet()" style="margin-top:8px; background:rgba(244,233,216,.15); color:#f4e9d8; border:1px solid rgba(244,233,216,.4);">📥 Scarica da Google Sheet</button>
+      <div id="last-fetch" style="font-size:11px; opacity:.7; margin-top:8px; text-align:center;"></div>
+      <button class="reset-link" onclick="resetSyncStatus()">Reimposta stato sincronizzazione</button>
+    </div>
+    <p style="color:#6b5444; font-size:14px;">Esporta manuale (oltre alla sincronizzazione):</p>
+    <button class="btn btn-primary" onclick="exportCSV()" style="margin-bottom:10px;">📊 Esporta Excel (CSV)</button>
+    <button class="btn btn-secondary" onclick="exportJSON()" style="margin-bottom:10px;">💾 Backup completo (JSON + foto)</button>
+    <button class="btn btn-secondary" onclick="importJSON()" style="margin-bottom:10px;">📥 Ripristina da backup</button>
+    <input type="file" id="import-file" accept=".json" class="hidden">
+    <div style="margin-top:24px; padding:12px; background:#fff; border-radius:8px; font-size:13px; color:#6b5444;">
+      <strong>Dati interni:</strong><br>
+      193 vasche · 32 operazioni · 7 prodotti e materiali
+    </div>
+    <button class="btn btn-ghost" onclick="clearAll()" style="margin-top:20px; color:#a04040;">🗑️ Cancella tutte le registrazioni</button>
+  </section>
+
+</main>
+
+<!-- VASCA PICKER MODAL -->
+<div class="modal-overlay" id="vasca-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Scegli vasca</h3>
+      <span class="count" id="modal-count" style="display:none;">0</span>
+      <button class="modal-close" onclick="closeVascaPicker()">×</button>
+    </div>
+    <div class="modal-search">
+      <input type="text" id="vasca-search" placeholder="Cerca codice vasca, vino, annata, codice origine…">
+    </div>
+    <div class="modal-filters" id="vasca-filters"></div>
+    <div class="modal-body" id="vasca-list"></div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="closeVascaPicker()">Fatto</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- PRODOTTO PICKER MODAL -->
+<div class="modal-overlay" id="prodotto-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Scegli prodotti</h3>
+      <span class="count" id="prodotto-modal-count" style="display:none;">0</span>
+      <button class="modal-close" onclick="closeProdottoPicker()">×</button>
+    </div>
+    <div class="modal-search">
+      <input type="text" id="prodotto-search" placeholder="Cerca prodotto…">
+    </div>
+    <div class="modal-body" id="prodotto-list"></div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="closeProdottoPicker()">Fatto</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- WIZARD CODICE ORIGINE -->
+<div class="modal-overlay" id="codice-modal">
+  <div class="modal" style="background: #f4f1ed;">
+    <div class="modal-head">
+      <h3>🔧 Componi codice origine</h3>
+      <button class="modal-close" onclick="closeCodiceWizard()">×</button>
+    </div>
+    <div class="modal-body" style="padding: 12px 16px;">
+
+      <div class="codice-preview">
+        <div class="label">Anteprima</div>
+        <div class="code empty" id="codice-preview-text">— compila i campi —</div>
+      </div>
+
+      <div class="wiz-section">
+        <h4><span class="step-num">1</span>Annata</h4>
+        <input type="text" id="wiz-annata" maxlength="1" inputmode="numeric"
+               placeholder="es. 5" oninput="updateCodicePreview()">
+      </div>
+
+      <div class="wiz-section">
+        <h4><span class="step-num">2</span>Vitigno o codice prodotto</h4>
+        <div class="toggle-pills">
+          <div class="pill active" id="pill-vitigno" onclick="switchProdottoType('vitigno')">Vitigno (vino base)</div>
+          <div class="pill" id="pill-pronto" onclick="switchProdottoType('pronto')">Vino pronto (3 lettere)</div>
+        </div>
+        <select id="wiz-vitigno" onchange="updateCodicePreview()">
+          <option value="">— Scegli vitigno —</option>
+        </select>
+        <select id="wiz-pronto" class="hidden" onchange="updateCodicePreview()">
+          <option value="">— Scegli linea prodotto —</option>
+        </select>
+      </div>
+
+      <div class="wiz-section">
+        <h4><span class="step-num">3</span>Unità produttiva</h4>
+        <select id="wiz-unita" onchange="onUnitaChange()">
+          <option value="">— Scegli unità —</option>
+        </select>
+        <input type="text" id="wiz-unita-custom" class="hidden" maxlength="2"
+               placeholder="Codice fornitore (2 lettere maiuscole)"
+               style="margin-top:8px; text-transform:uppercase;"
+               oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,''); updateCodicePreview()">
+      </div>
+
+      <div class="wiz-section">
+        <h4><span class="step-num">4</span>Numero/i vendemmia</h4>
+        <input type="text" id="wiz-vendemmia"
+               placeholder="es. 12+15"
+               oninput="updateCodicePreview()"
+               onblur="padVendemmia(this)">
+        <div style="font-size:11px; color:#8a7868; margin-top:4px;">
+          Numeri separati da +, in ordine di importanza quantitativa. Per i numeri 1-9 lo 0 davanti viene aggiunto in automatico (es. scrivi 5 → diventa 05).
+        </div>
+      </div>
+
+      <div class="wiz-section hidden" id="wiz-section-vf">
+        <h4>Campi Valdifalco (opzionale)</h4>
+        <input type="text" id="wiz-campi-vf"
+               placeholder="es. 26+5"
+               oninput="updateCodicePreview()">
+        <div style="font-size:11px; color:#8a7868; margin-top:4px;">
+          Tra parentesi nel codice — es. (26+5)
+        </div>
+      </div>
+
+      <div class="wiz-section">
+        <h4><span class="step-num">5</span>Campo</h4>
+        <div class="aggiunte-chips" id="wiz-campi-chips"></div>
+        <button type="button" class="aggiunta-add" onclick="openCampoPicker()">+ Aggiungi campo</button>
+        <div style="font-size:11px; color:#8a7868; margin-top:4px;">
+          Sigla a 2 lettere — più campi separati da + (es. MB+LA)
+        </div>
+      </div>
+
+      <div class="wiz-section">
+        <h4><span class="step-num">6</span>Aggiunte finali</h4>
+        <div class="aggiunte-chips" id="wiz-aggiunte-chips"></div>
+        <button type="button" class="aggiunta-add" onclick="openAggPicker()">+ Aggiungi codice</button>
+        <input type="text" id="wiz-clone"
+               placeholder="Cloni / altro (es. M1, T19)"
+               style="margin-top:8px;"
+               oninput="updateCodicePreview()">
+      </div>
+
+    </div>
+    <div class="modal-foot" style="display:flex; gap:8px;">
+      <button class="btn btn-secondary" onclick="resetCodiceWizard()" style="flex:1;">Pulisci</button>
+      <button class="btn btn-primary" onclick="confirmCodice()" style="flex:2;">Inserisci codice</button>
+    </div>
+  </div>
+</div>
+
+<!-- AGGIUNTE PICKER -->
+<div class="agg-picker-overlay" id="agg-picker">
+  <div class="agg-picker-list" id="agg-picker-list"></div>
+</div>
+
+<!-- CAMPO PICKER -->
+<div class="agg-picker-overlay" id="campo-picker">
+  <div class="agg-picker-list" id="campo-picker-list"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== DATA (embedded from Excel files) =====
+// === CANTINA-DATA:WL:META:START === (modificare per ogni cantina)
+const CANTINA_CODICE = 'WL';
+const CANTINA_NOME   = 'Registro Cantina WL';
+const CANTINA_LUNGO  = 'Weingut Loacker';
+const CANTINA_THEME  = '#5b1a1a';
+// === CANTINA-DATA:WL:META:END ===
+
+// I dataset condivisi (OPERAZIONI, AGGIUNTE_CODICE, STATI_LAVORAZIONE, PRODOTTI_MATERIALI)
+// sono uguali per tutte le cantine. I dataset specifici sono marcati
+// con CANTINA-DATA:WL:<NOME>:START/END e vanno sostituiti per ogni cantina.
+const OPERAZIONI = [{"codice": "AGG", "descrizione": "Aggiunta", "gruppo": "AGGIUNTE"}, {"codice": "COL", "descrizione": "Collaggio (SCHÖNEN)", "gruppo": "AGGIUNTE"}, {"codice": "PSP", "descrizione": "Preparazione Spumante", "gruppo": "AGGIUNTE"}, {"codice": "SOV", "descrizione": "Solfitazione Vino/Mosto", "gruppo": "AGGIUNTE"}, {"codice": "T2A", "descrizione": "Travaso secondario d'affinamento", "gruppo": "TRAVASI"}, {"codice": "TML", "descrizione": "Travaso post FML", "gruppo": "TRAVASI"}, {"codice": "TCV", "descrizione": "Travaso x Cambio Vasca", "gruppo": "TRAVASI"}, {"codice": "TTA", "descrizione": "Travaso x Taglio", "gruppo": "TRAVASI"}, {"codice": "TFI", "descrizione": "Travaso x Filtrazione", "gruppo": "TRAVASI"}, {"codice": "TST", "descrizione": "Travaso post stabil. tartarica", "gruppo": "TRAVASI"}, {"codice": "TPF", "descrizione": "Travaso pre FA", "gruppo": "TRAVASI VENDEMMIA"}, {"codice": "SVI", "descrizione": "Svinatura rosso", "gruppo": "TRAVASI VENDEMMIA"}, {"codice": "TFA", "descrizione": "Travaso post FA", "gruppo": "TRAVASI VENDEMMIA"}, {"codice": "T1A", "descrizione": "Travaso iniziale d'affinamento", "gruppo": "TRAVASI VENDEMMIA"}, {"codice": "SAC", "descrizione": "Scarico x Autoconsumo", "gruppo": "SCARICHI"}, {"codice": "SCD", "descrizione": "Scarico x Conferimento Distilleria", "gruppo": "SCARICHI"}, {"codice": "SCL", "descrizione": "Scarico x Conto Lavorazione", "gruppo": "SCARICHI"}, {"codice": "SEV", "descrizione": "Scarico x Evaporazione", "gruppo": "SCARICHI"}, {"codice": "SIM", "descrizione": "Scarico x Imbottigliamento", "gruppo": "SCARICHI"}, {"codice": "SPC", "descrizione": "Scarico x Colmatura", "gruppo": "SCARICHI"}, {"codice": "SPD", "descrizione": "Scarico x Perdita di Lavorazione", "gruppo": "SCARICHI"}, {"codice": "STS", "descrizione": "Scarico x Trasferimento Sede", "gruppo": "SCARICHI"}, {"codice": "SUA", "descrizione": "Scarico x Uso Alternativo Sottoprodotti", "gruppo": "SCARICHI"}, {"codice": "SVE", "descrizione": "Scarico x Vendita", "gruppo": "SCARICHI"}, {"codice": "BAT", "descrizione": "Bâtonnage", "gruppo": "OPERAZIONI senza movim."}, {"codice": "MCO", "descrizione": "Microossigenazione", "gruppo": "OPERAZIONI senza movim."}, {"codice": "SBL", "descrizione": "Solfitazione Botti legno", "gruppo": "OPERAZIONI senza movim."}, {"codice": "CAR", "descrizione": "Carico", "gruppo": "CARICHI"}, {"codice": "COB", "descrizione": "Carico da Conferimento di Uva Bianca", "gruppo": "CARICHI"}, {"codice": "CON", "descrizione": "Carico da Conferimento di Uva Rossa", "gruppo": "CARICHI"}, {"codice": "CDA", "descrizione": "Cambio Dati", "gruppo": "SCRITTURE"}, {"codice": "DOC", "descrizione": "Passaggio fra ATTO e DOC", "gruppo": "SCRITTURE"}];
+// === CANTINA-DATA:WL:VASCHE:START === (sostituire l'intera const VASCHE per ogni cantina)
+const VASCHE = [{"vasca": "S0", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1980", "ubicazione": "Hauptkeller", "capacita": 5.2}, {"vasca": "S01", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1980", "ubicazione": "Hauptkeller", "capacita": 78.5}, {"vasca": "S02", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1980", "ubicazione": "Hauptkeller", "capacita": 32}, {"vasca": "S03", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1990", "ubicazione": "Hauptkeller", "capacita": 19.8}, {"vasca": "S04", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1990", "ubicazione": "Hauptkeller", "capacita": 20}, {"vasca": "S05", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1980", "ubicazione": "Hauptkeller", "capacita": 32.05}, {"vasca": "S06", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1980", "ubicazione": "Hauptkeller", "capacita": 51.5}, {"vasca": "S07", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1980", "ubicazione": "Hauptkeller", "capacita": 32.2}, {"vasca": "S08", "marca": "DEFRANCESCHI", "tipo": "A - Acciaio", "anno": "1990", "ubicazione": "Hauptkeller", "capacita": 34.5}, {"vasca": "S09", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1980", "ubicazione": "Hauptkeller", "capacita": 7.4}, {"vasca": "S10", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1985", "ubicazione": "Hauptkeller", "capacita": 8.2}, {"vasca": "S11", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1985", "ubicazione": "Hauptkeller", "capacita": 8.2}, {"vasca": "S12", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1985", "ubicazione": "Hauptkeller", "capacita": 8.35}, {"vasca": "S13", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1985", "ubicazione": "Hauptkeller", "capacita": 4}, {"vasca": "S14", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1985", "ubicazione": "Hauptkeller", "capacita": 4}, {"vasca": "S15", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1980", "ubicazione": "Hauptkeller", "capacita": 12.2}, {"vasca": "S16", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1980", "ubicazione": "Hauptkeller", "capacita": 20.3}, {"vasca": "S17", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1980", "ubicazione": "Hauptkeller", "capacita": 16}, {"vasca": "S18", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1990", "ubicazione": "Hauptkeller", "capacita": 15.75}, {"vasca": "S19", "marca": "MITTELBERGER", "tipo": "L - Botte legno grande", "anno": "1990", "ubicazione": "Hauptkeller", "capacita": 13}, {"vasca": "S20", "marca": "MITTELBERGER", "tipo": "L - Botte legno grande", "anno": "2010", "ubicazione": "Hauptkeller", "capacita": 20}, {"vasca": "S21", "marca": "MITTELBERGER", "tipo": "L - Botte legno grande", "anno": "2010", "ubicazione": "Hauptkeller", "capacita": 19.6}, {"vasca": "S22", "marca": "SCHNECKENLEITNER", "tipo": "L - Botte legno grande", "anno": "1990", "ubicazione": "Ansetz", "capacita": 31.35}, {"vasca": "S23", "marca": "SCHNECKENLEITNER", "tipo": "L - Botte legno grande", "anno": "1990", "ubicazione": "Ansetz", "capacita": 31.5}, {"vasca": "S25", "marca": "SCHNECKENLEITNER", "tipo": "L - Botte legno grande", "anno": "1995", "ubicazione": "Ansetz", "capacita": 22.3}, {"vasca": "S26", "marca": "SCHNECKENLEITNER", "tipo": "L - Botte legno grande", "anno": "1995", "ubicazione": "Ansetz", "capacita": 22.15}, {"vasca": "S28", "marca": "MITTELBERGER", "tipo": "L - Botte legno grande", "anno": "1985", "ubicazione": "Ansetz", "capacita": 18}, {"vasca": "S29", "marca": "MITTELBERGER", "tipo": "L - Botte legno grande", "anno": "1985", "ubicazione": "Ansetz", "capacita": 18}, {"vasca": "S30", "marca": "MITTELBERGER", "tipo": "L - Botte legno grande", "anno": "1985", "ubicazione": "Ansetz", "capacita": 19}, {"vasca": "S31", "marca": "MITTELBERGER", "tipo": "L - Botte legno grande", "anno": "1985", "ubicazione": "Ansetz", "capacita": 17.5}, {"vasca": "S32", "marca": "MITTELBERGER", "tipo": "L - Botte legno grande", "anno": "1985", "ubicazione": "Ansetz", "capacita": 17}, {"vasca": "S33", "marca": "MITTELBERGER", "tipo": "L - Botte legno grande", "anno": "1985", "ubicazione": "Ansetz", "capacita": 17}, {"vasca": "S34", "marca": "MITTELBERGER", "tipo": "L - Botte legno grande", "anno": "1985", "ubicazione": "Ansetz", "capacita": 10.5}, {"vasca": "S35", "marca": "MITTELBERGER", "tipo": "L - Botte legno grande", "anno": "1985", "ubicazione": "Hauptkeller", "capacita": 18}, {"vasca": "S36", "marca": "MITTELBERGER", "tipo": "L - Botte legno grande", "anno": "1985", "ubicazione": "Hauptkeller", "capacita": 18.5}, {"vasca": "S37", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1980", "ubicazione": "Hauptkeller", "capacita": 15.75}, {"vasca": "S39", "marca": "METAL INOX", "tipo": "A - Acciaio", "anno": "1995", "ubicazione": "Hauptkeller", "capacita": 15.4}, {"vasca": "S40", "marca": "LOACKER REMEDIA", "tipo": "A - Acciaio", "anno": "2000", "ubicazione": "Hauptkeller", "capacita": 7.4}, {"vasca": "SB0038", "marca": "DARGAUD E JAEGLE", "tipo": "T - Tonneau", "anno": "2000", "ubicazione": "Hauptkeller", "capacita": 5.22}, {"vasca": "SB0104", "marca": "STOCKINGER", "tipo": "P - Botte legno piccola", "anno": "2004", "ubicazione": "Hauptkeller", "capacita": 1.2}, {"vasca": "SB0202", "marca": "STOCKINGER", "tipo": "P - Botte legno piccola", "anno": "2002", "ubicazione": "Hauptkeller", "capacita": 1.2}, {"vasca": "SB0902", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2009", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SB1101", "marca": "MITTELBERGER", "tipo": "T - Tonneau", "anno": "2011", "ubicazione": "Hauptkeller", "capacita": 5}, {"vasca": "SB1125", "marca": "MITTELBERGER", "tipo": "T - Tonneau", "anno": "2010", "ubicazione": "Hauptkeller", "capacita": 5}, {"vasca": "SB1302", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2013", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SB1402", "marca": "ATELIER CENTRE FRANCE", "tipo": "B - Barrique", "anno": "2014", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SB1601", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2016", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SB1602", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2016", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SB1801", "marca": "BEL AIR", "tipo": "B - Barrique", "anno": "2018", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SB1901", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2019", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SB2001", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2020", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SB2101", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2021", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SB2102", "marca": "BELAIR", "tipo": "T - Tonneau", "anno": "2021", "ubicazione": "Hauptkeller", "capacita": 5}, {"vasca": "SB2201", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2022", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SB2202", "marca": "DAMY", "tipo": "T - Tonneau", "anno": "2022", "ubicazione": "Hauptkeller", "capacita": 5}, {"vasca": "SB2301", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2023", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SB2310", "marca": "DAMY", "tipo": "T - Tonneau", "anno": "2024", "ubicazione": "Hauptkeller", "capacita": 5}, {"vasca": "SB2401", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2024", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SB2501", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2025", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SD01", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.05}, {"vasca": "SD02", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.05}, {"vasca": "SD03", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.05}, {"vasca": "SD04", "marca": "REMEDIA", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.05}, {"vasca": "SD05", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.05}, {"vasca": "SD06", "marca": "REMEDIA", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.05}, {"vasca": "SD10", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.1}, {"vasca": "SD11", "marca": "", "tipo": "V - Vetro", "anno": "2023", "ubicazione": "Variabile", "capacita": 0.1}, {"vasca": "SD12", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.1}, {"vasca": "SD13", "marca": "", "tipo": "V - Vetro", "anno": "2015", "ubicazione": "Variabile", "capacita": 0.1}, {"vasca": "SD14", "marca": "", "tipo": "V - Vetro", "anno": "2015", "ubicazione": "Variabile", "capacita": 0.1}, {"vasca": "SD15", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.15}, {"vasca": "SD16", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.15}, {"vasca": "SD17", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.15}, {"vasca": "SD20", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.2}, {"vasca": "SD21", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.2}, {"vasca": "SD24", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.25}, {"vasca": "SD25", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.25}, {"vasca": "SD26", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.25}, {"vasca": "SD27", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.25}, {"vasca": "SD34", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.34}, {"vasca": "SD54", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.54}, {"vasca": "SD55", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.54}, {"vasca": "SD56", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.54}, {"vasca": "SD57", "marca": "", "tipo": "V - Vetro", "anno": "", "ubicazione": "Variabile", "capacita": 0.54}, {"vasca": "SE01", "marca": "TAVA", "tipo": "F - Anfora", "anno": "2018", "ubicazione": "Hauptkeller", "capacita": 7}, {"vasca": "SF01", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.02}, {"vasca": "SF02", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.02}, {"vasca": "SF03", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.02}, {"vasca": "SF04", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.02}, {"vasca": "SF05", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.02}, {"vasca": "SF06", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.02}, {"vasca": "SF07", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.02}, {"vasca": "SF08", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.02}, {"vasca": "SF09", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.02}, {"vasca": "SF10", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.02}, {"vasca": "SF11", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.02}, {"vasca": "SF12", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.02}, {"vasca": "SF20", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.01}, {"vasca": "SF21", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.01}, {"vasca": "SF22", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.01}, {"vasca": "SF23", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.01}, {"vasca": "SF24", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.01}, {"vasca": "SF25", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.01}, {"vasca": "SF99", "marca": "", "tipo": "V - Bottiglia", "anno": "", "ubicazione": "Variabile", "capacita": 0.09}, {"vasca": "SR0111", "marca": "SANSAUD", "tipo": "P - Botte legno piccola", "anno": "2001", "ubicazione": "Hauptkeller", "capacita": 0.85}, {"vasca": "SR0202", "marca": "STOCKINGER", "tipo": "P - Botte legno piccola", "anno": "2002", "ubicazione": "Ansetz", "capacita": 1.2}, {"vasca": "SR0352", "marca": "STOCKINGER", "tipo": "P - Botte legno piccola", "anno": "2002", "ubicazione": "Schiffskeller", "capacita": 1.2}, {"vasca": "SR1507", "marca": "TARANSAUD", "tipo": "T - Tonneau", "anno": "2015", "ubicazione": "", "capacita": 5}, {"vasca": "SR1611", "marca": "SCHNECKENLEITNER", "tipo": "T - Tonneau", "anno": "2016", "ubicazione": "Ansetz", "capacita": 5}, {"vasca": "SR1612", "marca": "SCHNECKENLEITNER", "tipo": "T - Tonneau", "anno": "2016", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR1707", "marca": "TARANSAUD", "tipo": "T - Tonneau", "anno": "2017", "ubicazione": "Ansetz", "capacita": 5}, {"vasca": "SR1802", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2018", "ubicazione": "Hauptkeller", "capacita": 2.25}, {"vasca": "SR1804", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2018", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR1805", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2018", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR1806", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2018", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR1807", "marca": "TARANSAUD", "tipo": "T - Tonneau", "anno": "2018", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR1808", "marca": "DAMY", "tipo": "T - Tonneau", "anno": "2018", "ubicazione": "Ansetz", "capacita": 5}, {"vasca": "SR1809", "marca": "GARBELLOTTO", "tipo": "B - Barrique", "anno": "2018", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR1810", "marca": "GARBELLOTTO", "tipo": "B - Barrique", "anno": "2018", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR1902", "marca": "GARBELLOTTO", "tipo": "B - Barrique", "anno": "2019", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR1903", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2019", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR1904", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2019", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR1905", "marca": "DAMY", "tipo": "B - Barrique", "anno": "2019", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR1906", "marca": "GARBELLOTTO", "tipo": "B - Barrique", "anno": "2019", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR1907", "marca": "DAMY", "tipo": "T - Tonneau", "anno": "2019", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR1908", "marca": "TARANSAUD", "tipo": "T - Tonneau", "anno": "2019", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR1909", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2019", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2002", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2020", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2003", "marca": "BILLON", "tipo": "B - Barrique", "anno": "2020", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2004", "marca": "BERTHOMIEU", "tipo": "B - Barrique", "anno": "2020", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2005", "marca": "BERTHOMIEU", "tipo": "B - Barrique", "anno": "2020", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2006", "marca": "BILLON", "tipo": "B - Barrique", "anno": "2020", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2007", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2020", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2008", "marca": "TARANSAUD", "tipo": "T - Tonneau", "anno": "2020", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR2009", "marca": "BILLON", "tipo": "T - Tonneau", "anno": "2020", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR2103", "marca": "TARANSAUD", "tipo": "T - Tonneau", "anno": "2021", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR2104", "marca": "BILLON", "tipo": "T - Tonneau", "anno": "2021", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR2105", "marca": "BILLON", "tipo": "B - Barrique", "anno": "2021", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2106", "marca": "BERTHOMIEU", "tipo": "B - Barrique", "anno": "2021", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2107", "marca": "BILLON", "tipo": "B - Barrique", "anno": "2021", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2108", "marca": "BERTHOMIEU", "tipo": "B - Barrique", "anno": "2021", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2109", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2021", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2110", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2021", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2203", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2022", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2204", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2022", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2205", "marca": "BILLON", "tipo": "B - Barrique", "anno": "2022", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2206", "marca": "TARANSAUD", "tipo": "T - Tonneau", "anno": "2022", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR2207", "marca": "BILLON", "tipo": "T - Tonneau", "anno": "2022", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR2208", "marca": "BILLON", "tipo": "T - Tonneau", "anno": "2022", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR2209", "marca": "GARBELLOTTO", "tipo": "B - Barrique", "anno": "2022", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2210", "marca": "GARBELLOTTO", "tipo": "B - Barrique", "anno": "2022", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2302", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2023", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2303", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2023", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2304", "marca": "BILLON", "tipo": "B - Barrique", "anno": "2023", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2305", "marca": "BERTHOMIEU", "tipo": "B - Barrique", "anno": "2023", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2306", "marca": "BERTHOMIEU", "tipo": "B - Barrique", "anno": "2023", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2307", "marca": "BILLON", "tipo": "T - Tonneau", "anno": "2023", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR2308", "marca": "BILLON", "tipo": "T - Tonneau", "anno": "2023", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR2309", "marca": "TARANSAUD", "tipo": "T - Tonneau", "anno": "2023", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR2402", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2024", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2403", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2024", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2404", "marca": "BILLON", "tipo": "B - Barrique", "anno": "2024", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2405", "marca": "BERTHOMIEU", "tipo": "B - Barrique", "anno": "2024", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2406", "marca": "BERTHOMIEU", "tipo": "B - Barrique", "anno": "2024", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2407", "marca": "BILLON", "tipo": "T - Tonneau", "anno": "2024", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR2502", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2025", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2503", "marca": "CANTON", "tipo": "B - Barrique", "anno": "2025", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2504", "marca": "BILLON", "tipo": "B - Barrique", "anno": "2025", "ubicazione": "Schiffskeller", "capacita": 2.25}, {"vasca": "SR2505", "marca": "BILLON", "tipo": "T - Tonneau", "anno": "2025", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR2506", "marca": "TARANSAUD", "tipo": "T - Tonneau", "anno": "2025", "ubicazione": "Schiffskeller", "capacita": 5}, {"vasca": "SR4A", "marca": "", "tipo": "R - Vetro resina", "anno": "", "ubicazione": "Variabile", "capacita": 4.5}, {"vasca": "SS0A", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 10}, {"vasca": "SS1A", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 1}, {"vasca": "SS1B", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 1}, {"vasca": "SS1C", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 1}, {"vasca": "SS2A", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 2}, {"vasca": "SS2B", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 2}, {"vasca": "SS2C", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 2}, {"vasca": "SS3A", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 3}, {"vasca": "SS3C", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 3}, {"vasca": "SS4A", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 4}, {"vasca": "SS5A", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 5}, {"vasca": "SS5B", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 5}, {"vasca": "SS5C", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 5}, {"vasca": "SS7A", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 7}, {"vasca": "SS7B", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 7.1}, {"vasca": "ST1A", "marca": "LOACKER REMEDIA", "tipo": "A - Acciaio", "anno": "2000", "ubicazione": "Variabile", "capacita": 0.79}, {"vasca": "ST1B", "marca": "LOACKER REMEDIA", "tipo": "A - Acciaio", "anno": "2000", "ubicazione": "Variabile", "capacita": 0.79}, {"vasca": "ST1C", "marca": "BIRRA", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 0.5}, {"vasca": "ST1D", "marca": "BIRRA", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 0.5}, {"vasca": "ST2A", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 2.25}, {"vasca": "ST2B", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 2.25}, {"vasca": "ST2C", "marca": "", "tipo": "A - Acciaio", "anno": "", "ubicazione": "Variabile", "capacita": 1.55}];
+// === CANTINA-DATA:WL:VASCHE:END ===
+// === CANTINA-DATA:WL:LINEE_PRODOTTI:START === (sostituire per ogni cantina)
+const LINEE_PRODOTTI = [{"codice": "CHA", "descrizione": "ATEYON CHARDONNAY", "colore": "bianco"}, {"codice": "CLK", "descrizione": "KASTLET CABERNET LAGREIN", "colore": "rosso"}, {"codice": "GWA", "descrizione": "ATAGIS GEWÜRZTRAMINER", "colore": "bianco"}, {"codice": "LAG", "descrizione": "GRAN LAREYN LAGREIN", "colore": "rosso"}, {"codice": "LAR", "descrizione": "GRAN LAREYN LAGREIN RISERVA", "colore": "rosso"}, {"codice": "MEY", "descrizione": "YWAIN MERLOT", "colore": "rosso"}, {"codice": "NBS", "descrizione": "NUOVO BIANCO SH", "colore": "bianco"}, {"codice": "PGI", "descrizione": "ISARGUS PINOT GRIGIO", "colore": "bianco"}, {"codice": "PNN", "descrizione": "NORITAL PINOT NERO", "colore": "rosso"}, {"codice": "RIV", "descrizione": "RIESLING VINSCHGAU", "colore": "bianco"}, {"codice": "SBT", "descrizione": "TASNIM SAUVIGNON BLANC", "colore": "bianco"}, {"codice": "SGP", "descrizione": "SOUVIGNIER GRIS PIWI", "colore": "bianco"}, {"codice": "SIY", "descrizione": "YSAC SILVANER", "colore": "bianco"}, {"codice": "SMM", "descrizione": "MORIT SANKT MAGDALENER", "colore": "rosso"}, {"codice": "SMV", "descrizione": "SANKT MAGDALENER VIGNA", "colore": "rosso"}, {"codice": "SRS", "descrizione": "SPUMANTE ROSATO SÜDTIROL", "colore": "rosato"}, {"codice": "TAB", "descrizione": "TIROLENSIS ARS VINI BIANCO", "colore": "bianco"}, {"codice": "TAS", "descrizione": "TIROLENSIS ARS VINI SPUMANTE", "colore": "rosato"}, {"codice": "TAV", "descrizione": "TIROLENSIS ARS VINI ROSSO", "colore": "rosso"}, {"codice": "TLB", "descrizione": "TIMELESS BIANCO", "colore": "bianco"}, {"codice": "VER", "descrizione": "VERNATSCH", "colore": "rosso"}];
+// === CANTINA-DATA:WL:LINEE_PRODOTTI:END ===
+// === CANTINA-DATA:WL:VITIGNI:START === (sostituire per ogni cantina)
+const VITIGNI = [{"codice": "AR", "nome": "Aromera"}, {"codice": "CS", "nome": "Cabernet Sauvignon"}, {"codice": "CH", "nome": "Chardonnay"}, {"codice": "FI", "nome": "Fiano"}, {"codice": "GW", "nome": "Gewürztraminer"}, {"codice": "JO", "nome": "Johanniter"}, {"codice": "KE", "nome": "Kerner"}, {"codice": "LA", "nome": "Lagrein"}, {"codice": "ME", "nome": "Merlot"}, {"codice": "PG", "nome": "Pinot Grigio"}, {"codice": "PN", "nome": "Pinot Nero"}, {"codice": "RI", "nome": "Riesling"}, {"codice": "SB", "nome": "Sauvignon Blanc"}, {"codice": "SG", "nome": "Souvignier Gris"}, {"codice": "VE", "nome": "Vernatsch"}];
+// === CANTINA-DATA:WL:VITIGNI:END ===
+// === CANTINA-DATA:WL:UNITA_PROD:START === (sostituire per ogni cantina)
+const UNITA_PROD = [{"codice": "1", "nome": "Weingut Loacker (WL)"}, {"codice": "2", "nome": "Corte Pavone (CP)"}, {"codice": "3", "nome": "Valdifalco (VF)"}, {"codice": "PA", "nome": "Lagrein Gries"}, {"codice": "RT", "nome": "Lagrein Bozen Dorf"}, {"codice": "VK", "nome": "Riesling"}, {"codice": "LB", "nome": "Laimburg Souvignier Gris"}];
+// === CANTINA-DATA:WL:UNITA_PROD:END ===
+const AGGIUNTE_CODICE = [{"codice": "KH", "gruppo": "Origine", "descrizione": "Kohlerhof (>75%)"}, {"codice": "Kh", "gruppo": "Origine", "descrizione": "Kohlerhof (50-75%)"}, {"codice": "hK", "gruppo": "Origine", "descrizione": "Kohlerhof (25-50%)"}, {"codice": "kh", "gruppo": "Origine", "descrizione": "Kohlerhof (<25%)"}, {"codice": "AN", "gruppo": "Origine", "descrizione": "Anemone"}, {"codice": "F0", "gruppo": "Origine", "descrizione": "Fascia 0"}, {"codice": "F1", "gruppo": "Origine", "descrizione": "Fascia 1"}, {"codice": "F2", "gruppo": "Origine", "descrizione": "Fascia 2"}, {"codice": "F3", "gruppo": "Origine", "descrizione": "Fascia 3"}, {"codice": "S+", "gruppo": "Selezione", "descrizione": "Selezione positiva (uva non idonea vendemmiata prima)"}, {"codice": "S-", "gruppo": "Selezione", "descrizione": "Selezione negativa (uva non idonea vendemmiata dopo)"}, {"codice": "+", "gruppo": "Selezione", "descrizione": "Qualità superiore"}, {"codice": "++", "gruppo": "Selezione", "descrizione": "Qualità superiore eccelsa"}, {"codice": "-", "gruppo": "Selezione", "descrizione": "Qualità inferiore"}, {"codice": "SPU", "gruppo": "Tipologia", "descrizione": "Vino base da spumante"}, {"codice": "SA", "gruppo": "Tipologia", "descrizione": "Vino salasso"}, {"codice": "PC", "gruppo": "Tipologia", "descrizione": "Pied de cuve"}, {"codice": "RIP", "gruppo": "Tipologia", "descrizione": "Ripassato su vinacce non pressate"}, {"codice": "RIP-", "gruppo": "Tipologia", "descrizione": "Ripassato su vinacce pressate"}, {"codice": "T+", "gruppo": "Torchiatura", "descrizione": "Vino feccioso con torchiato 1ª qualità"}, {"codice": "T", "gruppo": "Torchiatura", "descrizione": "Vino torchiato"}, {"codice": "T-", "gruppo": "Torchiatura", "descrizione": "Torchiato bassa qualità (fine pressa)"}, {"codice": "F", "gruppo": "Feccia", "descrizione": "Vino feccioso"}, {"codice": "RF", "gruppo": "Feccia", "descrizione": "Recupero fecce"}, {"codice": "FE", "gruppo": "Feccia", "descrizione": "Feccia"}, {"codice": "COL", "gruppo": "Movimento", "descrizione": "Vino usato per colmatura"}, {"codice": "FI", "gruppo": "Movimento", "descrizione": "Vino di 1° passaggio nel filtro"}];
+// === CANTINA-DATA:WL:CAMPI:START === (sostituire per ogni cantina)
+const CAMPI = [{"codice": "SCHWARHOF LACK", "italiano": "SH PISCINA", "abbr": "LA"}, {"codice": "SCHWARHOF MANDELBAUM", "italiano": "SH MANDORLO", "abbr": "MB"}, {"codice": "SCHWARHOF NUSSBAUM", "italiano": "SH NOCE", "abbr": "NB"}, {"codice": "SCHWARHOF WEG", "italiano": "SH STRADA", "abbr": "WE"}, {"codice": "SCHWARHOF KIRSCHBAUM", "italiano": "SH CILIEGIO", "abbr": "KB"}, {"codice": "SCHWARHOF LÄRCHENHAUS", "italiano": "SH CASA IN LARICE", "abbr": "LH"}, {"codice": "SCHWARHOF GARTEN", "italiano": "SH ORTO", "abbr": "GA"}, {"codice": "SCHWARHOF ZYPRESSE", "italiano": "SH CIPRESSO", "abbr": "ZY"}, {"codice": "SCHWARHOF WESTHANG", "italiano": "SH VERSANTE OVEST", "abbr": "WH"}, {"codice": "SCHWARHOF PITSCH", "italiano": "SH PITSCH", "abbr": "PI"}, {"codice": "KOHLERHOF", "italiano": "KH KOHLERHOF", "abbr": "KH"}, {"codice": "KOHLERHOF WESTHANG", "italiano": "KH VERSANTE OVEST", "abbr": "WH"}, {"codice": "KOHLERHOF MITTE OBER WEG", "italiano": "KH CENTRO SOPRA STRADA", "abbr": "MO"}, {"codice": "KOHLERHOF MITTE UNTER WEG", "italiano": "KH CENTRO SOTTO STRADA", "abbr": "MI"}, {"codice": "KOHLERHOF MITTE UNTER KIRSCHBAUM", "italiano": "KH CENTRO SOTTO CILIEGIO", "abbr": "MU"}, {"codice": "KOHLERHOF OSTHANG", "italiano": "KH VERSANTE EST", "abbr": "OH"}, {"codice": "KOHLERHOF BRAUN", "italiano": "KH BRAUN", "abbr": "BR"}, {"codice": "KOHLERHOF GREAL", "italiano": "KH GREAL", "abbr": "GR"}, {"codice": "KALTER KELLER OBER MAUER", "italiano": "KK SOPRA MURO", "abbr": "KK"}, {"codice": "KALTER KELLER SCHWIMMBAD", "italiano": "KK PISCINA", "abbr": "KK"}, {"codice": "KALTER KELLER MITTE", "italiano": "KK CENTRO", "abbr": "KK"}, {"codice": "KALTER KELLER TOR", "italiano": "KK CANCELLO", "abbr": "KK"}, {"codice": "IHLDERHOF HOACHN", "italiano": "IH ALTO", "abbr": "IH"}, {"codice": "IHLDERHOF PONSN", "italiano": "IH PONSN", "abbr": "IH"}, {"codice": "IHLDERHOF GRIANBAM", "italiano": "IH ALBERO VERDE", "abbr": "IH"}, {"codice": "IHLDERHOF GORTN", "italiano": "IH ORTO", "abbr": "IH"}, {"codice": "IHLDERHOF LONGE", "italiano": "IH FILARI LUNGHI", "abbr": "IH"}, {"codice": "IHLDERHOF STOLL", "italiano": "IH STALLA", "abbr": "IH"}, {"codice": "IHLDERHOF BÖGEN", "italiano": "IH ARCHI", "abbr": "IH"}, {"codice": "IHLDERHOF KUCHL", "italiano": "IH CUCINA", "abbr": "IH"}, {"codice": "IHLDERHOF BACHL", "italiano": "IH RUSCELLO", "abbr": "IH"}, {"codice": "IHLDERHOF MITTE", "italiano": "IH CENTRO", "abbr": "IH"}, {"codice": "IHLDERHOF LOCH", "italiano": "IH BASSO", "abbr": "IH"}];
+// === CANTINA-DATA:WL:CAMPI:END ===
+// === CANTINA-DATA:WL:OPERATORI:START === (sostituire per ogni cantina)
+const OPERATORI = ['Mattia Viscomi', 'Hayo Loacker'];
+// === CANTINA-DATA:WL:OPERATORI:END ===
+const STATI_LAVORAZIONE = [
+  'Uva intera',
+  'Uva pigiata diraspata',
+  'Uva pigiata diraspata in FA',
+  'Mosto feccioso pressato',
+  'Mosto sfecciato',
+  'Mosto in FA',
+  'Vino feccioso fine FA',
+  'Vino feccioso 1°travaso post FA',
+  'Vino feccioso 2°travaso post FA',
+  'Vino feccioso 3°travaso post FA',
+  'Vino feccioso dopo travaso post FML',
+  'Vino pulito dopo travaso post FML',
+  'Vino sotto colla',
+  'Vino travasato collato',
+  'Vino filtrato brillante (1,5-3µ)',
+  'Vino filtrato brillante (0,9-1,6µ)',
+  'Vino filtrato sterile (0,2-0,5)',
+  'Vino pulito ok x imbott.',
+  'Vino in spumantizzazione'
+];
+// Per ogni operazione, lo stato (o gli stati possibili) di destinazione.
+//   stringa singola → automatico
+//   array          → l'utente sceglie
+//   '*'            → scelta libera tra tutti gli stati
+//   undefined      → eredita lo stato della vasca di partenza
+const OPERAZIONI_STATI = {
+  // AGGIUNTE
+  // 'AGG': eredita
+  'COL': 'Vino sotto colla',
+  'PSP': 'Vino in spumantizzazione',
+  // 'SOV': eredita
+
+  // TRAVASI
+  // TFA fa il PRIMO travaso post FA; T2A è "secondario" → 2° o 3°.
+  'TFA': ['Vino feccioso 1°travaso post FA', 'Vino feccioso 2°travaso post FA', 'Vino feccioso 3°travaso post FA'],
+  // 'TCV': eredita
+  'T2A': ['Vino feccioso 1°travaso post FA', 'Vino feccioso 2°travaso post FA', 'Vino feccioso 3°travaso post FA'],
+  'TFI': ['Vino filtrato brillante (1,5-3µ)', 'Vino filtrato brillante (0,9-1,6µ)', 'Vino filtrato sterile (0,2-0,5)'],
+  // 'TST': eredita
+  // 'TTA': eredita
+
+  // TRAVASI VENDEMMIA
+  'SVI': 'Vino feccioso fine FA',
+  'T1A': 'Vino feccioso fine FA',
+  'TML': ['Vino feccioso dopo travaso post FML', 'Vino pulito dopo travaso post FML'],
+  'TPF': 'Mosto sfecciato',
+
+  // SCARICHI: nessuno (il vino esce dalla cantina, no stato destinazione)
+
+  // OPERAZIONI senza movim.
+  // BAT/MCO/SBL: eredita
+
+  // CARICHI
+  'CAR': '*',
+  'COB': ['Uva intera', 'Uva pigiata diraspata', 'Mosto feccioso pressato'],
+  'CON': ['Uva intera', 'Uva pigiata diraspata', 'Mosto feccioso pressato'],
+
+  // SCRITTURE
+  'CDA': '*'
+  // 'DOC': eredita
+};
+const SCARICHI_GRUPPO = ['SCARICHI'];
+// Mappa di progressione automatica: per operazioni "progressive" (TFA, T2A),
+// se la vasca di partenza è nello stato X, il form propone direttamente X+1.
+// L'utente può sempre cambiare manualmente.
+const STATO_PROGRESSIONE = {
+  'Vino feccioso fine FA':           'Vino feccioso 1°travaso post FA',
+  'Vino feccioso 1°travaso post FA': 'Vino feccioso 2°travaso post FA',
+  'Vino feccioso 2°travaso post FA': 'Vino feccioso 3°travaso post FA'
+};
+const OP_PROGRESSIVE = ['TFA', 'T2A'];
+
+// Eccezione per AGGIUNTE: queste operazioni pur non muovendo vino,
+// cambiano comunque lo stato di lavorazione delle vasche di partenza.
+//   PSP (Preparazione Spumante) → Vino in spumantizzazione
+//   COL (Collaggio)             → Vino sotto colla
+// Funziona anche con piu vasche (ogni vasca scelta cambia il proprio stato).
+const OPERAZIONI_CAMBIA_STATO = new Set(['PSP', 'COL']);
+const PRODOTTI_MATERIALI = [{"descrizione": "Acido citrico", "gruppo": "CONSERVANTE", "unita_default": "g/hl"}, {"descrizione": "Acido metatartarico", "gruppo": "CONSERVANTE", "unita_default": "g/hl"}, {"descrizione": "Acido tartarico", "gruppo": "CONSERVANTE", "unita_default": "g/hl"}, {"descrizione": "Metabisolfito di potassio", "gruppo": "CONSERVANTE", "unita_default": "g/hl"}, {"descrizione": "Bentonite", "gruppo": "CHIARIFICANTE", "unita_default": "g/hl"}, {"descrizione": "Cartoni SK700 (1,5-3,5µm) (25 pezzi)", "gruppo": "CARTONI FILTRANTI", "unita_default": "pezzi"}, {"descrizione": "Cartoni SSF (0,7-0,9µm) (25 pezzi)", "gruppo": "CARTONI FILTRANTI", "unita_default": "pezzi"}, {"descrizione": "Cartoni SSS (0,4-0,4µm) (25 pezzi)", "gruppo": "CARTONI FILTRANTI", "unita_default": "pezzi"}];
+const PRODOTTO_GRUPPI = ['AGGIUNTE', 'TRAVASI', 'TRAVASI VENDEMMIA'];
+const TRAVASO_GRUPPI = ['TRAVASI', 'TRAVASI VENDEMMIA'];
+
+// ===== STATE =====
+// Defensive read: alcuni contesti (anteprima sandboxed) bloccano localStorage.
+let entries = [];
+try { entries = JSON.parse(localStorage.getItem('cantina-entries') || '[]'); } catch (_) { entries = []; }
+let pendingPhotos = [];
+let currentFilter = 'all';
+let selectedPartenza = []; // array of vasca codes
+let selectedArrivo = [];   // array of vasca codes
+let pickerTarget = 'partenza';
+let vascaFilter = 'all';
+
+let selectedProdotti = []; // array of {descrizione, gruppo, quantita, unita}
+let editingEntryId = null; // null = nuova entry, altrimenti id dell'entry in modifica
+
+function getWineVolume() {
+  const totA = selectedArrivo.reduce((s, p) => s + parseHl(p.quantita), 0);
+  if (totA > 0) return totA;
+  return selectedPartenza.reduce((s, p) => s + parseHl(p.quantita), 0);
+}
+
+function isHlUnit(u) {
+  return u === 'g/hl' || u === 'mg/hl' || u === 'ml/hl';
+}
+
+function totalUnit(doseUnit) {
+  if (doseUnit === 'g/hl') return 'g';
+  if (doseUnit === 'mg/hl') return 'mg';
+  if (doseUnit === 'ml/hl') return 'ml';
+  return doseUnit;
+}
+
+function formatProdValue(n, unit) {
+  if (n === 0 || isNaN(n) || n === null || n === undefined) return '';
+  if (unit === 'pezzi') return String(Math.round(n));
+  // Use up to 4 decimals, trim trailing zeros, min 2 decimals
+  let s = Number(n).toFixed(4).replace(/0+$/, '');
+  if (s.endsWith('.')) s = s + '00';
+  else {
+    const parts = s.split('.');
+    if (parts.length === 2 && parts[1].length === 1) s = parts[0] + '.' + parts[1] + '0';
+  }
+  return s.replace('.', ',');
+}
+
+function recomputeTotaleFromDose(p) {
+  if (!isHlUnit(p.unita)) return;
+  const wv = getWineVolume();
+  const d = parseHl(p.dose);
+  p.totale = (wv > 0 && d > 0) ? formatProdValue(d * wv, totalUnit(p.unita)) : '';
+}
+
+function recomputeDoseFromTotale(p) {
+  if (!isHlUnit(p.unita)) return;
+  const wv = getWineVolume();
+  const t = parseHl(p.totale);
+  p.dose = (wv > 0 && t > 0) ? formatProdValue(t / wv, p.unita) : '';
+}
+
+function onDoseInput(idx, val) {
+  const p = selectedProdotti[idx]; if (!p) return;
+  p.dose = val;
+  recomputeTotaleFromDose(p);
+  const totInput = document.getElementById('prod-tot-' + idx);
+  if (totInput) totInput.value = p.totale;
+}
+
+function onTotaleInput(idx, val) {
+  const p = selectedProdotti[idx]; if (!p) return;
+  p.totale = val;
+  if (isHlUnit(p.unita)) {
+    recomputeDoseFromTotale(p);
+    const doseInput = document.getElementById('prod-dose-' + idx);
+    if (doseInput) doseInput.value = p.dose;
+  }
+}
+
+function normalizeDose(idx, input) {
+  const p = selectedProdotti[idx]; if (!p) return;
+  let val = (input.value || '').trim();
+  if (!val) { p.dose = ''; recomputeTotaleFromDose(p); refreshTotaleField(idx); return; }
+  val = val.replace('.', ',');
+  const m = val.match(/^(\d+)(?:,(\d*))?$/);
+  if (!m) { toast('⚠️ Solo cifre e virgola'); return; }
+  let decPart = m[2] || '';
+  if (decPart.length > 4) { toast('⚠️ Massimo 4 decimali'); return; }
+  if (decPart.length < 2) decPart = decPart.padEnd(2, '0');
+  const normalized = m[1] + ',' + decPart;
+  input.value = normalized;
+  p.dose = normalized;
+  recomputeTotaleFromDose(p);
+  refreshTotaleField(idx);
+}
+
+function normalizeTotale(idx, input) {
+  const p = selectedProdotti[idx]; if (!p) return;
+  let val = (input.value || '').trim();
+  if (!val) { p.totale = ''; if (isHlUnit(p.unita)) { recomputeDoseFromTotale(p); refreshDoseField(idx); } return; }
+  val = val.replace('.', ',');
+  const m = val.match(/^(\d+)(?:,(\d*))?$/);
+  if (!m) { toast('⚠️ Solo cifre e virgola'); return; }
+  // pezzi -> integer
+  if (p.unita === 'pezzi') {
+    p.totale = m[1];
+    input.value = p.totale;
+    return;
+  }
+  let decPart = m[2] || '';
+  if (decPart.length > 4) { toast('⚠️ Massimo 4 decimali'); return; }
+  if (decPart.length < 2) decPart = decPart.padEnd(2, '0');
+  const normalized = m[1] + ',' + decPart;
+  input.value = normalized;
+  p.totale = normalized;
+  if (isHlUnit(p.unita)) {
+    recomputeDoseFromTotale(p);
+    refreshDoseField(idx);
+  }
+}
+
+function refreshTotaleField(idx) {
+  const inp = document.getElementById('prod-tot-' + idx);
+  if (inp && selectedProdotti[idx]) inp.value = selectedProdotti[idx].totale || '';
+}
+
+function refreshDoseField(idx) {
+  const inp = document.getElementById('prod-dose-' + idx);
+  if (inp && selectedProdotti[idx]) inp.value = selectedProdotti[idx].dose || '';
+}
+
+function onProdottoUnitChange(idx, newUnit) {
+  const p = selectedProdotti[idx]; if (!p) return;
+  const wasHl = isHlUnit(p.unita);
+  const isHl = isHlUnit(newUnit);
+  p.unita = newUnit;
+  if (wasHl && !isHl) {
+    // switching out of hl-unit: keep totale, drop dose
+    p.dose = '';
+  } else if (!wasHl && isHl) {
+    // switching to hl-unit: recompute dose from totale if possible
+    recomputeDoseFromTotale(p);
+  } else if (isHl) {
+    // Same family but different (g/hl <-> mg/hl <-> ml/hl): recompute totale from current dose
+    recomputeTotaleFromDose(p);
+  }
+  renderProdottoChips();
+}
+
+function refreshProdottiTotali() {
+  // Called when wine volume changes (vasche edits)
+  selectedProdotti.forEach((p, idx) => {
+    if (isHlUnit(p.unita) && p.dose) {
+      recomputeTotaleFromDose(p);
+      refreshTotaleField(idx);
+    }
+  });
+}
+
+function openProdottoPicker() {
+  document.getElementById('prodotto-modal').classList.add('show');
+  document.getElementById('prodotto-search').value = '';
+  updateProdottoModalCount();
+  renderProdottoList();
+  setTimeout(() => document.getElementById('prodotto-search').focus(), 100);
+}
+function closeProdottoPicker() {
+  document.getElementById('prodotto-modal').classList.remove('show');
+}
+function updateProdottoModalCount() {
+  const el = document.getElementById('prodotto-modal-count');
+  el.textContent = selectedProdotti.length;
+  el.style.display = selectedProdotti.length > 0 ? 'inline-block' : 'none';
+}
+
+function renderProdottoList() {
+  const q = document.getElementById('prodotto-search').value.trim().toLowerCase();
+  let list = PRODOTTI_MATERIALI;
+  if (q) list = list.filter(p =>
+    p.descrizione.toLowerCase().includes(q) || p.gruppo.toLowerCase().includes(q)
+  );
+  const el = document.getElementById('prodotto-list');
+  if (list.length === 0) {
+    el.innerHTML = `<div class="picker-empty">Nessun prodotto trovato</div>`;
+    return;
+  }
+  const groups = {};
+  list.forEach(p => {
+    const g = p.gruppo || 'Altro';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(p);
+  });
+  const order = ['CONSERVANTE','CHIARIFICANTE','CARTONI FILTRANTI'];
+  const keys = Object.keys(groups).sort((a,b) => {
+    const ai = order.indexOf(a); const bi = order.indexOf(b);
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
+  el.innerHTML = keys.map(g => {
+    const items = groups[g].map(p => {
+      const sel = selectedProdotti.some(sp => sp.descrizione === p.descrizione);
+      return `
+        <div class="picker-item ${sel ? 'selected' : ''}" onclick="toggleProdotto('${escapeAttr(p.descrizione)}')">
+          <div class="check">${sel ? '✓' : ''}</div>
+          <span class="meta" style="font-weight:600;color:#2b1a14;">${escapeHtml(p.descrizione)}</span>
+        </div>
+      `;
+    }).join('');
+    return `<div class="group-head">${escapeHtml(g)}</div>${items}`;
+  }).join('');
+}
+
+function toggleProdotto(descrizione) {
+  const i = selectedProdotti.findIndex(p => p.descrizione === descrizione);
+  if (i === -1) {
+    const src = PRODOTTI_MATERIALI.find(p => p.descrizione === descrizione);
+    selectedProdotti.push({
+      descrizione: src.descrizione,
+      gruppo: src.gruppo,
+      unita: src.unita_default,
+      dose: '',
+      totale: ''
+    });
+  } else {
+    selectedProdotti.splice(i, 1);
+  }
+  updateProdottoModalCount();
+  renderProdottoList();
+  renderProdottoChips();
+}
+
+function renderProdottoChips() {
+  const btn = document.getElementById('btn-prodotti');
+  const lbl = document.getElementById('label-prodotti');
+  const el = document.getElementById('chips-prodotti');
+  if (selectedProdotti.length === 0) {
+    lbl.textContent = 'Tocca per scegliere…';
+    btn.classList.add('placeholder');
+    el.innerHTML = '';
+    return;
+  }
+  btn.classList.remove('placeholder');
+  lbl.textContent = selectedProdotti.length === 1 ? '1 prodotto selezionato' : selectedProdotti.length + ' prodotti selezionati';
+
+  const wv = getWineVolume();
+  const wvHint = wv > 0 ? `su ${formatHl(wv)} hl di vino` : '⚠ imposta prima le vasche';
+
+  const unitOptions = ['g/hl','mg/hl','ml/hl','kg','g','pezzi'];
+
+  el.innerHTML = selectedProdotti.map((p, i) => {
+    const gruppoClass = p.gruppo === 'CARTONI FILTRANTI' ? 'gruppo cartoni'
+                      : p.gruppo === 'CHIARIFICANTE' ? 'gruppo chiarificanti'
+                      : 'gruppo';
+    const opts = unitOptions.map(u =>
+      `<option value="${u}" ${p.unita===u?'selected':''}>${u}</option>`
+    ).join('');
+
+    let body;
+    if (isHlUnit(p.unita)) {
+      const tu = totalUnit(p.unita);
+      body = `
+        <div class="qta-row">
+          <span class="qlabel">Dose</span>
+          <input type="text" id="prod-dose-${i}" inputmode="decimal"
+                 placeholder="0,00" value="${escapeAttr(p.dose || '')}"
+                 oninput="onDoseInput(${i}, this.value)"
+                 onblur="normalizeDose(${i}, this)">
+          <select onchange="onProdottoUnitChange(${i}, this.value)">${opts}</select>
+        </div>
+        <div class="qta-row">
+          <span class="qlabel">Totale</span>
+          <input type="text" id="prod-tot-${i}" inputmode="decimal"
+                 placeholder="0,00" value="${escapeAttr(p.totale || '')}"
+                 oninput="onTotaleInput(${i}, this.value)"
+                 onblur="normalizeTotale(${i}, this)">
+          <span class="unit-static">${escapeHtml(tu)}</span>
+        </div>
+        <div class="volume-note">${wvHint}</div>`;
+    } else {
+      const placeholder = p.unita === 'pezzi' ? '0' : '0,00';
+      body = `
+        <div class="qta-row">
+          <span class="qlabel">Quantità</span>
+          <input type="text" id="prod-tot-${i}" inputmode="decimal"
+                 placeholder="${placeholder}" value="${escapeAttr(p.totale || '')}"
+                 oninput="onTotaleInput(${i}, this.value)"
+                 onblur="normalizeTotale(${i}, this)">
+          <select onchange="onProdottoUnitChange(${i}, this.value)">${opts}</select>
+        </div>`;
+    }
+
+    return `
+      <div class="prodotto-chip">
+        <div class="name">
+          <span class="${gruppoClass}">${escapeHtml(p.gruppo)}</span>
+          <span>${escapeHtml(p.descrizione)}</span>
+          <button class="x" onclick="removeProdotto(${i})">×</button>
+        </div>
+        ${body}
+      </div>
+    `;
+  }).join('');
+}
+
+function removeProdotto(i) {
+  selectedProdotti.splice(i, 1);
+  renderProdottoChips();
+}
+
+
+// ===== INIT =====
+function populateVinoSelect() {
+  const sel = document.getElementById('f-vino');
+  if (sel.options.length <= 1) {
+    LINEE_PRODOTTI.forEach(l => {
+      const o = document.createElement('option');
+      o.value = l.codice;
+      o.textContent = `${l.codice} — ${l.descrizione}`;
+      sel.appendChild(o);
+    });
+  }
+}
+
+function populateAnnataSelect() {
+  const sel = document.getElementById('f-annata');
+  if (sel.options.length <= 1) {
+    const now = new Date();
+    const latest = now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear() - 1;
+    for (let i = 0; i < 10; i++) {
+      const y = latest - i;
+      const o = document.createElement('option');
+      o.value = String(y);
+      o.textContent = String(y);
+      sel.appendChild(o);
+    }
+  }
+}
+
+// ===== STATO LAVORAZIONE =====
+// Popola la select con la lista di stati, opzionalmente pre-seleziona uno e blocca
+function populateStatoSelect(opts, preselect, locked) {
+  const sel = document.getElementById('f-stato');
+  if (!sel) return;
+  const current = sel.value;
+  let html = '<option value="">— Seleziona stato —</option>';
+  opts.forEach(s => {
+    html += `<option value="${escapeAttr(s)}">${escapeHtml(s)}</option>`;
+  });
+  sel.innerHTML = html;
+  if (preselect && opts.includes(preselect)) {
+    sel.value = preselect;
+  } else if (current && opts.includes(current)) {
+    sel.value = current;
+  } else {
+    sel.value = '';
+  }
+  sel.disabled = !!locked;
+}
+
+// Configura il campo stato in base all'operazione selezionata
+function configureStatoField() {
+  const opCode = document.getElementById('f-op').value;
+  const op = OPERAZIONI.find(o => o.codice === opCode);
+  const fieldEl = document.getElementById('field-stato');
+  const hintEl = document.getElementById('stato-mode-hint');
+
+  if (!op) {
+    fieldEl.classList.remove('hidden');
+    populateStatoSelect(STATI_LAVORAZIONE, '', false);
+    if (hintEl) hintEl.textContent = '';
+    return;
+  }
+
+  // SCARICHI: nessuno stato destinazione (il vino esce dalla cantina)
+  if (op.gruppo === 'SCARICHI') {
+    fieldEl.classList.add('hidden');
+    document.getElementById('f-stato').value = '';
+    return;
+  }
+
+  fieldEl.classList.remove('hidden');
+  const rule = OPERAZIONI_STATI[opCode];
+
+  if (typeof rule === 'string' && rule !== '*') {
+    populateStatoSelect([rule], rule, true);
+    if (hintEl) hintEl.textContent = '— automatico';
+  } else if (rule === '*') {
+    populateStatoSelect(STATI_LAVORAZIONE, '', false);
+    if (hintEl) hintEl.textContent = '— scelta libera';
+  } else if (Array.isArray(rule)) {
+    populateStatoSelect(rule, '', false);
+    if (hintEl) hintEl.textContent = '— scegli tra le opzioni';
+  } else {
+    // Eredita
+    populateStatoSelect(STATI_LAVORAZIONE, '', false);
+    if (hintEl) hintEl.textContent = '— eredita dalla vasca di partenza';
+  }
+}
+
+// Quando si seleziona una vasca di partenza, eredita il suo stato se il campo lo permette.
+// Per le operazioni progressive (TFA, T2A) avanza automaticamente al passo successivo
+// secondo STATO_PROGRESSIONE (es. 1°→2°→3° travaso post FA). L'utente puo cambiare a mano.
+function autofillStatoFromVasca(vascaCode) {
+  if (!vascaCode) return;
+  const { state } = computeCantinaState();
+  const s = state[vascaCode];
+  if (!s || !s.statoLavorazione) return;
+  const sel = document.getElementById('f-stato');
+  if (!sel || sel.disabled || sel.value) return;
+  const opts = [...sel.options].map(o => o.value);
+
+  // Progressione automatica per TFA/T2A: se lo stato di partenza ha un "prossimo", usalo
+  const opCode = document.getElementById('f-op').value;
+  if (OP_PROGRESSIVE.includes(opCode)) {
+    const next = STATO_PROGRESSIONE[s.statoLavorazione];
+    if (next && opts.includes(next)) {
+      sel.value = next;
+      if (typeof lastAutofill !== 'undefined') lastAutofill.statoLavorazione = next;
+      return;
+    }
+  }
+
+  // Default: copia lo stato della vasca di partenza se compatibile con le opzioni
+  if (opts.includes(s.statoLavorazione)) {
+    sel.value = s.statoLavorazione;
+    if (typeof lastAutofill !== 'undefined') lastAutofill.statoLavorazione = s.statoLavorazione;
+  }
+}
+
+function init() {
+  const now = new Date();
+  document.getElementById('f-data').value = now.toISOString().split('T')[0];
+  document.getElementById('f-ora').value = now.toTimeString().slice(0,5);
+
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => switchTab(t.dataset.tab));
+  });
+  document.getElementById('f-foto').addEventListener('change', handlePhotos);
+  document.getElementById('import-file').addEventListener('change', handleImport);
+  document.getElementById('vasca-search').addEventListener('input', renderVascaList);
+
+  populateVinoSelect();
+  populateAnnataSelect();
+  populateStatoSelect(STATI_LAVORAZIONE, '', false);
+  loadSyncEmail();
+  renderList();
+  renderStatoFilters();
+  updateLastFetchLabel();
+  // Registrazione service worker per uso offline
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('SW registrato:', reg.scope))
+        .catch(err => console.warn('SW non registrato:', err));
+    });
+  }
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+  document.getElementById('tab-' + name).classList.remove('hidden');
+  if (name === 'list')  renderList();
+  if (name === 'stato') renderStato();
+}
+
+// ===== OP CHANGE =====
+function onOpChange() {
+  const code = document.getElementById('f-op').value;
+  const op = OPERAZIONI.find(o => o.codice === code);
+  const isTravaso = op && TRAVASO_GRUPPI.includes(op.gruppo);
+  const isProdottoGruppo = op && PRODOTTO_GRUPPI.includes(op.gruppo);
+  document.getElementById('field-arrivo').classList.toggle('hidden', !isTravaso);
+  document.getElementById('travaso-hint').classList.toggle('hidden', !isTravaso);
+  document.getElementById('field-prodotti').classList.toggle('hidden', !isProdottoGruppo);
+  // Update label of partenza based on context
+  const lbl = document.getElementById('lbl-partenza');
+  lbl.innerHTML = isTravaso ? '🛢️ Vasche da scaricare' : '🛢️ Vasca / Botte / Barrique';
+  if (!isTravaso) {
+    selectedArrivo = [];
+    renderChips('arrivo');
+  }
+  if (!isProdottoGruppo) {
+    selectedProdotti = [];
+    renderProdottoChips();
+  }
+  // Configura il campo stato lavorazione in base all'operazione
+  configureStatoField();
+}
+
+// ===== VASCA PICKER =====
+// Cache dello stato cantina calcolato quando si apre il picker, riusato per i badge.
+let _pickerStateCache = null;
+
+function openVascaPicker(target) {
+  pickerTarget = target;
+  document.getElementById('modal-title').textContent =
+    target === 'partenza' ? 'Vasche da scaricare' : 'Vasche da caricare';
+  document.getElementById('vasca-modal').classList.add('show');
+  document.getElementById('vasca-search').value = '';
+  vascaFilter = 'all';
+  // Calcola lo stato cantina una volta sola per tutto il tempo del picker
+  try { _pickerStateCache = computeCantinaState().state; } catch (_) { _pickerStateCache = {}; }
+  updateModalCount();
+  renderVascaFilters();
+  renderVascaList();
+  setTimeout(() => document.getElementById('vasca-search').focus(), 100);
+  // Re-render dopo l'animazione del modal per assicurare misura corretta delle chip
+  setTimeout(() => renderVascaFilters(), 300);
+}
+function closeVascaPicker() {
+  document.getElementById('vasca-modal').classList.remove('show');
+  _pickerStateCache = null;
+}
+
+// Helper: badge di stato riempimento per una vasca, da mostrare nel picker.
+// Per il picker "arrivo": evidenzia gli hl LIBERI.
+// Per il picker "partenza": evidenzia gli hl USATI (cosa c'e dentro).
+function vascaFillBadgeHtml(vascaCode) {
+  const state = _pickerStateCache || {};
+  const s = state[vascaCode];
+  const vd = VASCHE.find(v => v.vasca === vascaCode);
+  const cap = vd && vd.capacita ? vd.capacita : 0;
+  const used = s ? s.quantita : 0;
+  const fs = getFillState(used, cap);
+  const isArrivo = (pickerTarget !== 'partenza');
+
+  if (fs === 'vuota') {
+    return `<span class="fill-badge vuota">Vuota</span>`;
+  }
+  if (fs === 'errore') {
+    return `<span class="fill-badge errore">+${(used - cap).toFixed(2)} hl</span>`;
+  }
+  if (fs === 'piena') {
+    return `<span class="fill-badge piena">Piena</span>`;
+  }
+  // scolma
+  const free = Math.max(0, cap - used);
+  if (isArrivo) {
+    return `<span class="fill-badge scolma">${free.toFixed(2)} hl libere</span>`;
+  } else {
+    return `<span class="fill-badge scolma">${used.toFixed(2)} hl</span>`;
+  }
+}
+function updateModalCount() {
+  const arr = pickerTarget === 'partenza' ? selectedPartenza : selectedArrivo;
+  const el = document.getElementById('modal-count');
+  el.textContent = arr.length;
+  el.style.display = arr.length > 0 ? 'inline-block' : 'none';
+}
+
+function renderVascaFilters() {
+  // Ordine fisso: Hauptkeller, Ansetz, Schiffskeller, poi le altre alfabetiche
+  const ordineFisso = ['Hauptkeller', 'Ansetz', 'Schiffskeller'];
+  const tutte = [...new Set(VASCHE.map(v => v.ubicazione).filter(Boolean))];
+  const altre = tutte.filter(u => !ordineFisso.includes(u)).sort();
+  const ordered = [...ordineFisso.filter(u => tutte.includes(u)), ...altre];
+  const filters = ['all', ...ordered];
+  document.getElementById('vasca-filters').innerHTML = filters.map(f => {
+    const label = f === 'all' ? 'Tutte' : escapeHtml(f);
+    const cls = vascaFilter === f ? 'chip active' : 'chip';
+    return `<div class="${cls}" onclick="setVascaFilter('${escapeAttr(f)}')">${label}</div>`;
+  }).join('');
+}
+function setVascaFilter(f) { vascaFilter = f; renderVascaFilters(); renderVascaList(); }
+
+function renderVascaList() {
+  const q = document.getElementById('vasca-search').value.trim().toLowerCase();
+  let list = VASCHE;
+  if (vascaFilter !== 'all') list = list.filter(v => v.ubicazione === vascaFilter);
+  if (q) list = list.filter(v => {
+    // Match su attributi della vasca (codice, tipo, marca)
+    if (v.vasca.toLowerCase().includes(q) ||
+        (v.tipo || '').toLowerCase().includes(q) ||
+        (v.marca || '').toLowerCase().includes(q)) return true;
+    // Match sul contenuto attuale (vino, descrizione, annata, codice origine, colore)
+    const cur = (_pickerStateCache || {})[v.vasca];
+    if (cur) {
+      if ((cur.vino || '').toLowerCase().includes(q)) return true;
+      if ((cur.vinoDescrizione || '').toLowerCase().includes(q)) return true;
+      if (String(cur.annata || '').toLowerCase().includes(q)) return true;
+      if ((cur.codiceOrigine || '').toLowerCase().includes(q)) return true;
+      if ((cur.colore || '').toLowerCase().includes(q)) return true;
+    }
+    return false;
+  });
+
+  const el = document.getElementById('vasca-list');
+  if (list.length === 0) {
+    el.innerHTML = `<div class="picker-empty">Nessuna vasca trovata</div>`;
+    return;
+  }
+  const selectedArr = pickerTarget === 'partenza' ? selectedPartenza : selectedArrivo;
+
+  // group by tipo
+  const groups = {};
+  list.forEach(v => {
+    const t = v.tipo || 'Altro';
+    if (!groups[t]) groups[t] = [];
+    groups[t].push(v);
+  });
+  const tipoOrder = ['A - Acciaio','L - Botte legno grande','T - Tonneau','B - Barrique','P - Botte legno piccola','F - Anfora','V - Vetro','V - Bottiglia','R - Vetro resina'];
+  const keys = Object.keys(groups).sort((a,b) => {
+    const ai = tipoOrder.indexOf(a); const bi = tipoOrder.indexOf(b);
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
+  el.innerHTML = keys.map(t => {
+    const items = groups[t].map(v => {
+      const sel = selectedArr.some(x => x.vasca === v.vasca);
+      const isArrivo = (pickerTarget !== 'partenza');
+      const state = _pickerStateCache || {};
+      const cur = state[v.vasca];
+      const used = cur ? cur.quantita : 0;
+      const fs = getFillState(used, v.capacita || 0);
+      // Self-travaso: se la vasca e' gia' in partenza, permettiamo di sceglierla anche in arrivo
+      const alreadyInPartenza = selectedPartenza.some(p => p.vasca === v.vasca);
+      const disabledForLoad = isArrivo && !sel && !alreadyInPartenza && (fs === 'piena' || fs === 'errore');
+      const cls = `picker-item ${sel ? 'selected' : ''}${disabledForLoad ? ' disabled' : ''}`;
+      const onClick = disabledForLoad
+        ? `onclick="toast('⚠️ ${escapeAttr(v.vasca)} è già piena, non può ricevere altro vino')"`
+        : `onclick="toggleVasca('${escapeAttr(v.vasca)}')"`;
+      // Riga vino solo se la vasca ha del contenuto (scolma, piena o errore)
+      const wineLine = (cur && used > 0.001) ? `
+        <div class="picker-item-wine">
+          <span class="v-name">${escapeHtml(cur.vinoDescrizione || cur.vino || '—')}</span>
+          ${cur.annata ? `<span class="v-sep">·</span><span>${escapeHtml(cur.annata)}</span>` : ''}
+          ${cur.codiceOrigine ? `<span class="v-sep">·</span><span class="v-orig">${escapeHtml(cur.codiceOrigine)}</span>` : ''}
+        </div>` : '';
+      return `
+        <div class="${cls}" ${onClick}>
+          <div class="check">${sel ? '✓' : ''}</div>
+          <span class="code">${escapeHtml(v.vasca)}</span>
+          <span class="meta">${escapeHtml((v.marca || '—') + ' · ' + (v.ubicazione || '—'))}</span>
+          <span class="cap">${v.capacita !== '' ? v.capacita + ' hl' : ''}</span>
+          ${vascaFillBadgeHtml(v.vasca)}
+          ${wineLine}
+        </div>
+      `;
+    }).join('');
+    return `<div class="group-head">${escapeHtml(t)}</div>${items}`;
+  }).join('');
+}
+
+function toggleVasca(codice) {
+  const arr = pickerTarget === 'partenza' ? selectedPartenza : selectedArrivo;
+  const i = arr.findIndex(x => x.vasca === codice);
+  if (i === -1) {
+    const v = VASCHE.find(x => x.vasca === codice);
+    let defaultQta;
+    if (pickerTarget === 'partenza') {
+      // Default: quantità di vino reale se la vasca ne contiene, altrimenti capacità
+      const stateEntry = (_pickerStateCache || {})[codice];
+      const wineQta = stateEntry ? stateEntry.quantita : 0;
+      defaultQta = wineQta > 0.001 ? formatHl(wineQta) : formatHl(v.capacita);
+    } else {
+      // Auto-distribute: remaining = total partenza - total arrivo
+      const totP = selectedPartenza.reduce((s, p) => s + parseHl(p.quantita), 0);
+      const totA = selectedArrivo.reduce((s, p) => s + parseHl(p.quantita), 0);
+      const remaining = Math.max(0, totP - totA);
+      const allocated = Math.min(remaining, v.capacita || 0);
+      defaultQta = allocated > 0 ? formatHl(allocated) : '';
+    }
+    arr.push({ vasca: codice, quantita: defaultQta });
+    // Autofill vino/annata/codice + stato lavorazione quando si seleziona una vasca di partenza
+    if (pickerTarget === 'partenza') {
+      autofillFromVasca(codice);
+      autofillStatoFromVasca(codice);
+    }
+  } else {
+    arr.splice(i, 1);
+    // Se la partenza diventa vuota dopo la rimozione, pulisci i campi auto-compilati
+    if (pickerTarget === 'partenza' && selectedPartenza.length === 0) {
+      clearAutofilledFields();
+    }
+  }
+  updateModalCount();
+  renderVascaList();
+  renderChips(pickerTarget);
+  // If we changed arrivo, just render. If we changed partenza, the user might want to see updated arrivo distribution but we keep arrivo as-is (user edits respected).
+}
+
+function renderChips(target) {
+  const arr = target === 'partenza' ? selectedPartenza : selectedArrivo;
+  const cls = target === 'partenza' ? 'partenza' : 'arrivo';
+  const btn = document.getElementById('btn-' + target);
+  const lbl = document.getElementById('label-' + target);
+  const chipsEl = document.getElementById('chips-' + target);
+  const totEl = document.getElementById('total-' + target);
+
+  if (arr.length === 0) {
+    lbl.textContent = 'Tocca per scegliere…';
+    btn.classList.add('placeholder');
+    chipsEl.innerHTML = '';
+    totEl.classList.add('hidden');
+    return;
+  }
+  btn.classList.remove('placeholder');
+  lbl.textContent = arr.length === 1 ? '1 vasca selezionata' : arr.length + ' vasche selezionate';
+
+  chipsEl.innerHTML = arr.map((item, idx) => {
+    const v = VASCHE.find(x => x.vasca === item.vasca);
+    if (!v) return '';
+    const warnHtml = target === 'arrivo' ? `<div class="vasca-chip-warn" id="chip-warn-arrivo-${idx}"></div>` : '';
+    return `
+      <div class="vasca-chip ${cls}">
+        <span class="code">${escapeHtml(v.vasca)}</span>
+        <span class="cap-ref">cap. ${formatHl(v.capacita)} hl</span>
+        <div class="qta-wrap">
+          <input type="text" class="qta-input" inputmode="decimal"
+                 value="${escapeAttr(item.quantita || '')}"
+                 placeholder="0,00"
+                 oninput="updateChipQta('${target}', ${idx}, this.value)"
+                 onblur="normalizeChipQta('${target}', ${idx}, this)">
+          <span class="unit">hl</span>
+        </div>
+        <button class="x" onclick="removeChip('${target}','${escapeAttr(item.vasca)}')">×</button>
+        ${warnHtml}
+      </div>
+    `;
+  }).join('');
+  if (target === 'arrivo') refreshArrivoWarnings();
+
+  renderTotals();
+}
+
+function refreshArrivoWarnings() {
+  selectedArrivo.forEach((item, idx) => {
+    const el = document.getElementById('chip-warn-arrivo-' + idx);
+    if (!el) return;
+    const v = VASCHE.find(x => x.vasca === item.vasca);
+    if (!v) { el.textContent = ''; el.className = 'vasca-chip-warn'; return; }
+    const qta = parseHl(item.quantita);
+    const cap = parseHl(v.capacita);
+    el.className = 'vasca-chip-warn';
+    if (qta <= 0) {
+      el.textContent = '';
+      el.style.display = 'none';
+    } else if (Math.abs(qta - cap) < 0.001) {
+      el.style.display = 'block';
+      el.classList.add('warn-ok');
+      el.textContent = '✓ Vasca piena';
+    } else if (qta < cap) {
+      el.style.display = 'block';
+      el.classList.add('warn-under');
+      const manca = cap - qta;
+      el.textContent = `⚠ Vasca non piena — mancano ${formatHl(manca)} hl per riempirla`;
+    } else {
+      el.style.display = 'block';
+      el.classList.add('warn-over');
+      const eccede = qta - cap;
+      el.textContent = `⚠ Eccede la capacità di ${formatHl(eccede)} hl`;
+    }
+  });
+}
+
+function renderTotals() {
+  const totP = selectedPartenza.reduce((s, p) => s + parseHl(p.quantita), 0);
+  const totA = selectedArrivo.reduce((s, p) => s + parseHl(p.quantita), 0);
+  refreshProdottiTotali();
+  refreshArrivoWarnings();
+  // aggiorna la nota volume nelle chip prodotto
+  document.querySelectorAll('.prodotto-chip .volume-note').forEach((el) => {
+    const wv = getWineVolume();
+    el.textContent = wv > 0 ? `su ${formatHl(wv)} hl di vino` : '⚠ imposta prima le vasche';
+  });
+  const totPel = document.getElementById('total-partenza');
+  const totAel = document.getElementById('total-arrivo');
+
+  if (selectedPartenza.length > 0) {
+    totPel.classList.remove('hidden');
+    totPel.innerHTML = `<span>Totale da scaricare</span><strong>${formatHl(totP)} hl</strong>`;
+    totPel.className = 'vasche-total';
+  } else {
+    totPel.classList.add('hidden');
+  }
+
+  if (selectedArrivo.length > 0) {
+    totAel.classList.remove('hidden');
+    const diff = totP - totA;
+    let cls = 'vasche-total';
+    let hint = '';
+    if (Math.abs(diff) < 0.001) {
+      cls += ' ok';
+      hint = ' ✓';
+    } else if (totP > 0) {
+      cls += ' warn';
+      if (diff > 0) hint = ` — mancano ${formatHl(diff)} hl da assegnare`;
+      else hint = ` — eccedenza di ${formatHl(-diff)} hl`;
+    }
+    totAel.className = cls;
+    totAel.innerHTML = `<span>Totale da caricare${hint}</span><strong>${formatHl(totA)} hl</strong>`;
+  } else {
+    totAel.classList.add('hidden');
+  }
+}
+
+function updateChipQta(target, idx, val) {
+  const arr = target === 'partenza' ? selectedPartenza : selectedArrivo;
+  if (arr[idx]) arr[idx].quantita = val;
+  renderTotals();
+  if (target === 'arrivo') refreshArrivoWarnings();
+}
+
+function normalizeChipQta(target, idx, input) {
+  const arr = target === 'partenza' ? selectedPartenza : selectedArrivo;
+  let val = (input.value || '').trim();
+  if (!val) { arr[idx].quantita = ''; renderTotals(); if (target === 'arrivo') refreshArrivoWarnings(); return; }
+  val = val.replace('.', ',');
+  const m = val.match(/^(\d+)(?:,(\d*))?$/);
+  if (!m) { toast('⚠️ Solo cifre e virgola'); return; }
+  let decPart = m[2] || '';
+  if (decPart.length > 4) { toast('⚠️ Massimo 4 cifre dopo la virgola'); return; }
+  if (decPart.length < 2) decPart = decPart.padEnd(2, '0');
+  const normalized = m[1] + ',' + decPart;
+  input.value = normalized;
+  arr[idx].quantita = normalized;
+  renderTotals();
+  if (target === 'arrivo') refreshArrivoWarnings();
+}
+
+function removeChip(target, code) {
+  const arr = target === 'partenza' ? selectedPartenza : selectedArrivo;
+  const i = arr.findIndex(x => x.vasca === code);
+  if (i !== -1) arr.splice(i, 1);
+  renderChips(target);
+}
+
+// ===== PHOTOS =====
+function handlePhotos(e) {
+  const files = Array.from(e.target.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 1024;
+        let w = img.width, h = img.height;
+        if (w > h && w > maxDim) { h = h * maxDim / w; w = maxDim; }
+        else if (h > maxDim) { w = w * maxDim / h; h = maxDim; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        pendingPhotos.push(canvas.toDataURL('image/jpeg', 0.7));
+        renderPhotoPreview();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+function renderPhotoPreview() {
+  document.getElementById('photo-preview').innerHTML = pendingPhotos.map((p, i) => `
+    <div class="photo-item">
+      <img src="${p}">
+      <button class="remove" onclick="removePhoto(${i})">×</button>
+    </div>
+  `).join('');
+}
+function removePhoto(i) { pendingPhotos.splice(i, 1); renderPhotoPreview(); }
+
+// ===== SAVE =====
+function saveEntry() {
+  const opCode = document.getElementById('f-op').value;
+  if (!opCode) { toast('⚠️ Seleziona l\'operazione'); return; }
+  if (selectedPartenza.length === 0) { toast('⚠️ Seleziona almeno una vasca'); return; }
+
+  const op = OPERAZIONI.find(o => o.codice === opCode);
+  const isTravaso = TRAVASO_GRUPPI.includes(op.gruppo);
+  if (isTravaso && selectedArrivo.length === 0) {
+    toast('⚠️ Per un travaso indica anche le vasche di arrivo'); return;
+  }
+
+  // Stato lavorazione obbligatorio tranne che per gli SCARICHI
+  const statoLavorazione = document.getElementById('f-stato').value;
+  const isScarico = op.gruppo === 'SCARICHI';
+  if (!isScarico && !statoLavorazione) {
+    toast('⚠️ Seleziona lo stato di lavorazione'); return;
+  }
+
+  // Compute totals
+  const totP = selectedPartenza.reduce((s, p) => s + parseHl(p.quantita), 0);
+  const totA = selectedArrivo.reduce((s, p) => s + parseHl(p.quantita), 0);
+  if (isTravaso && Math.abs(totP - totA) > 0.001) {
+    if (!confirm(`Attenzione: totale da scaricare (${formatHl(totP)} hl) diverso dal totale da caricare (${formatHl(totA)} hl). Salvare comunque?`)) return;
+  }
+
+  // Blocco oversaving: una vasca caricata non può superare la sua capacità.
+  // Per TRAVASI → controlla vasche di arrivo. Per CARICHI → controlla vasche di partenza (quirk UI).
+  const isCaricoOp = op.gruppo === 'CARICHI';
+  const loadedVasche = isTravaso ? selectedArrivo : (isCaricoOp ? selectedPartenza : []);
+  if (loadedVasche.length > 0) {
+    const { state: cantinaState } = computeCantinaState(editingEntryId);
+    // Per i TRAVASI, considera che le vasche di partenza si svuotano contestualmente:
+    // se carico in una vasca che era piena ma che ora sto anche scaricando dalla stessa partenza, ok.
+    // Per semplicita controlliamo lo stato pre-operazione: se l'utente sta facendo TCV dalla stessa vasca, non e' un caso comune.
+    for (const v of loadedVasche) {
+      const vd = VASCHE.find(x => x.vasca === v.vasca);
+      if (!vd || !vd.capacita) continue;
+      const currentUsed = cantinaState[v.vasca] ? cantinaState[v.vasca].quantita : 0;
+      // Se la stessa vasca e' anche in partenza del travaso, sottrai cio che si scarica
+      let netStart = currentUsed;
+      if (isTravaso) {
+        const sourceHere = selectedPartenza.find(p => p.vasca === v.vasca);
+        if (sourceHere) netStart = Math.max(0, currentUsed - parseHl(sourceHere.quantita));
+      }
+      const adding = parseHl(v.quantita);
+      const finalQta = netStart + adding;
+      if (finalQta > vd.capacita + 0.05) {
+        toast(`⚠️ ${v.vasca}: ${formatHl(finalQta)} hl supera la capacità di ${formatHl(vd.capacita)} hl`);
+        return;
+      }
+    }
+  }
+
+  // Warnings non bloccanti: chiediamo conferma all utente prima di salvare
+  // (vasche di partenza vuote, scarico eccessivo, mischio vini su arrivo)
+  const warnings = checkEntryWarnings(op.gruppo, selectedPartenza, selectedArrivo, document.getElementById('f-vino').value.trim(), document.getElementById('f-annata').value.trim());
+  if (warnings.length > 0) {
+    const msg = `⚠️ Attenzione, questa operazione presenta:\n\n${warnings.join('\n')}\n\nSalvare comunque?`;
+    if (!confirm(msg)) return;
+  }
+
+  const isProdottoGruppo = PRODOTTO_GRUPPI.includes(op.gruppo);
+  const isEditing = editingEntryId != null;
+  const existingEntry = isEditing ? entries.find(e => e.id === editingEntryId) : null;
+
+  const entry = {
+    // In modifica conserviamo id e createdAt originali
+    id: isEditing ? editingEntryId : Date.now(),
+    opCode,
+    opDesc: op.descrizione,
+    opGruppo: op.gruppo,
+    vaschePartenza: selectedPartenza.map(p => ({ vasca: p.vasca, quantita: p.quantita || '' })),
+    vascheArrivo: isTravaso ? selectedArrivo.map(p => ({ vasca: p.vasca, quantita: p.quantita || '' })) : [],
+    prodottiMateriali: isProdottoGruppo ? selectedProdotti.filter(p => (p.dose && p.dose.trim()) || (p.totale && p.totale.trim())).map(p => ({...p})) : [],
+    vino: document.getElementById('f-vino').value.trim(),
+    annata: document.getElementById('f-annata').value.trim(),
+    codiceOrigine: document.getElementById('f-codice').value.trim(),
+    prodotto: [document.getElementById('f-vino').value.trim(), document.getElementById('f-annata').value.trim(), document.getElementById('f-codice').value.trim()].filter(Boolean).join(' · '),
+    data: document.getElementById('f-data').value,
+    ora: document.getElementById('f-ora').value,
+    qta: formatHl(totP),
+    operatore: document.getElementById('f-operatore').value.trim(),
+    note: document.getElementById('f-note').value.trim(),
+    foto: [...pendingPhotos],
+    statoLavorazione: statoLavorazione,
+    createdAt: existingEntry ? (existingEntry.createdAt || new Date().toISOString()) : new Date().toISOString(),
+    editedAt: isEditing ? new Date().toISOString() : undefined,
+    // Dopo l'edit deve essere ri-inviata, quindi sent=false
+    sent: false
+  };
+
+  if (isEditing) {
+    // Sostituisce in place mantenendo la posizione nello storico
+    const idx = entries.findIndex(e => e.id === editingEntryId);
+    if (idx >= 0) entries[idx] = entry;
+    else entries.unshift(entry);
+    // Se la vecchia era sincronizzata, cancella la riga corrispondente sul Sheet
+    if (existingEntry && existingEntry.sent) {
+      deleteFromSheet(editingEntryId);
+    }
+    editingEntryId = null;
+    hideEditBanner();
+    toast('✅ Modifica salvata — ricordati di re-inviare');
+  } else {
+    entries.unshift(entry);
+    toast('✅ Registrato!');
+  }
+  persist();
+  resetForm();
+  setTimeout(() => switchTab('list'), 600);
+}
+
+function resetForm() {
+  editingEntryId = null;
+  if (typeof hideEditBanner === 'function') hideEditBanner();
+  document.getElementById('f-op').value = '';
+  selectedPartenza = [];
+  selectedArrivo = [];
+  renderChips('partenza');
+  renderChips('arrivo');
+  document.getElementById('field-arrivo').classList.add('hidden');
+  document.getElementById('travaso-hint').classList.add('hidden');
+  document.getElementById('field-prodotti').classList.add('hidden');
+  selectedProdotti = [];
+  renderProdottoChips();
+  document.getElementById('lbl-partenza').innerHTML = '🛢️ Vasca / Botte / Barrique';
+  document.getElementById('f-vino').value = '';
+  document.getElementById('f-annata').value = '';
+  document.getElementById('f-codice').value = '';
+  document.getElementById('f-operatore').value = '';
+  document.getElementById('f-note').value = '';
+  pendingPhotos = [];
+  renderPhotoPreview();
+  populateStatoSelect(STATI_LAVORAZIONE, '', false);
+  // Forza la pulizia anche se il valore precedente era ancora valido nelle opzioni
+  // (populateStatoSelect lo conserverebbe per evitare di perdere selezioni utente)
+  document.getElementById('f-stato').value = '';
+  document.getElementById('f-stato').disabled = false;
+  document.getElementById('field-stato').classList.remove('hidden');
+  const hintEl = document.getElementById('stato-mode-hint'); if (hintEl) hintEl.textContent = '';
+  // Reset memoria autofill: dopo Pulisci nulla è più "auto"
+  lastAutofill = { vino: '', annata: '', codiceOrigine: '', statoLavorazione: '' };
+  const now = new Date();
+  document.getElementById('f-data').value = now.toISOString().split('T')[0];
+  document.getElementById('f-ora').value = now.toTimeString().slice(0,5);
+}
+
+function persist() {
+  try { localStorage.setItem('cantina-entries', JSON.stringify(entries)); }
+  catch (e) { toast('⚠️ Memoria piena — esporta backup'); }
+}
+
+
+// ===== SYNC TO GOOGLE SHEET =====
+// Funzioni saveSyncEmail/loadSyncEmail rimosse: l'endpoint e' ora hardcoded
+// in REGISTRO_API_URL (Apps Script). Mantengo gli stub vuoti per sicurezza
+// nel caso qualche listener o vecchio onclick li richiamasse ancora.
+function saveSyncEmail() { /* deprecated */ }
+function loadSyncEmail() { /* deprecated */ }
+function updateSyncUI() {
+  const pending = entries.filter(e => !e.sent);
+  const el = document.getElementById('sync-pending');
+  const btn = document.getElementById('btn-send');
+  if (!el || !btn) return;
+  el.textContent = pending.length === 0
+    ? '✓ Tutto sincronizzato'
+    : pending.length === 1
+      ? '1 registrazione da inviare'
+      : pending.length + ' registrazioni da inviare';
+  btn.disabled = pending.length === 0;
+  btn.textContent = pending.length === 0
+    ? 'Niente da inviare'
+    : `Invia ${pending.length} ${pending.length === 1 ? 'registrazione' : 'registrazioni'} ora`;
+}
+
+// Endpoint Google Apps Script — riceve il POST e scrive nel Google Sheet "Registro Cantina"
+const REGISTRO_API_URL = 'https://script.google.com/macros/s/AKfycbywYYVwLvbWhz4rD4jyNqjs3kKclnjMGujE7-CC6QFKLhNyCd2tt0sHtzZUb_dXxrYP/exec';
+
+async function sendToExcel() {
+  const pending = entries.filter(e => !e.sent);
+  if (pending.length === 0) { toast('Nessuna registrazione nuova'); return; }
+
+  // Costruisce il payload JSON
+  const payload = {
+    cantina: 'Loacker',
+    inviato: new Date().toISOString(),
+    numeroRegistrazioni: pending.length,
+    registrazioni: pending.map(e => ({
+      id: e.id,
+      data: e.data,
+      ora: e.ora,
+      codiceOperazione: e.opCode,
+      operazione: e.opDesc,
+      gruppo: e.opGruppo,
+      vascheDaScaricare: (e.vaschePartenza || []).map(v => typeof v === 'string' ? { vasca: v, quantita: '' } : v),
+      vascheDaCaricare: (e.vascheArrivo || []).map(v => typeof v === 'string' ? { vasca: v, quantita: '' } : v),
+      prodottiMateriali: (e.prodottiMateriali || []).map(p => ({
+        descrizione: p.descrizione,
+        gruppo: p.gruppo,
+        unita: p.unita,
+        dose: p.dose || '',
+        totale: p.totale || '',
+        unitaTotale: p.unita ? totalUnit(p.unita) : '',
+        quantitaLegacy: p.quantita || ''
+      })),
+      vinoCodice: e.vino || '',
+      vinoDescrizione: (() => { const l = LINEE_PRODOTTI.find(x => x.codice === e.vino); return l ? l.descrizione : ''; })(),
+      annata: e.annata || '',
+      codiceOrigine: e.codiceOrigine || '',
+      quantitaVinoHl: e.qta || '',
+      operatore: e.operatore || '',
+      note: e.note || '',
+      statoLavorazione: e.statoLavorazione || '',
+      numeroFoto: (e.foto || []).length,
+      registratoIl: e.createdAt
+    }))
+  };
+
+  const btn = document.getElementById('btn-send');
+  const originalText = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Invio in corso…'; }
+
+  try {
+    const res = await fetch(REGISTRO_API_URL, {
+      method: 'POST',
+      // NOTA: niente header Content-Type → il browser usa text/plain
+      // → evita la richiesta CORS preflight che Apps Script non gestisce.
+      // Il server fa comunque JSON.parse(e.postData.contents).
+      body: JSON.stringify(payload),
+      redirect: 'follow'
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'errore lato server');
+
+    markAsSent(pending);
+    toast(`✅ ${data.inserted || pending.length} registrazion${(data.inserted || pending.length) === 1 ? 'e inviata' : 'i inviate'} su Google Sheet`);
+    renderList();
+  } catch (err) {
+    console.error('sendToExcel error:', err);
+    toast('❌ Invio fallito: ' + (err.message || err) + ' — riprova quando hai segnale');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = originalText; }
+  }
+}
+
+function markAsSent(items) {
+  const ids = new Set(items.map(e => e.id));
+  entries.forEach(e => { if (ids.has(e.id)) { e.sent = true; e.sentAt = new Date().toISOString(); } });
+  persist();
+}
+
+function resetSyncStatus() {
+  if (!confirm('Reimpostare lo stato di sincronizzazione?\nTutte le registrazioni torneranno "da inviare".')) return;
+  entries.forEach(e => { e.sent = false; delete e.sentAt; });
+  persist(); renderList(); toast('Stato reimpostato');
+}
+
+// ===== SCARICA DA GOOGLE SHEET (sync bidirezionale) =====
+// Fa una GET all'endpoint con ?action=list, riceve tutte le registrazioni
+// presenti nel foglio, e fa il merge per id con quelle locali.
+//   - registrazione NUOVA (solo remota): viene aggiunta a entries
+//   - registrazione GIA' inviata (sent=true) locale: viene sovrascritta col remoto
+//   - registrazione NON inviata (sent=false) locale: viene preservata (e' un draft)
+//   - foto locali vengono sempre preservate (non vengono mai inviate al cloud)
+async function fetchFromSheet() {
+  const btn = document.getElementById('btn-fetch');
+  const originalText = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Scarico…'; }
+
+  try {
+    const res = await fetch(REGISTRO_API_URL + '?action=list', { method: 'GET' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'errore lato server');
+
+    const remote = Array.isArray(data.registrazioni) ? data.registrazioni : [];
+
+    // Indice locale per id (id puo' essere number o string, normalizziamo)
+    const localById = new Map();
+    entries.forEach(e => { if (e.id != null) localById.set(String(e.id), e); });
+
+    let added = 0, updated = 0, skipped = 0;
+    for (const re of remote) {
+      const id = re.id != null ? String(re.id) : '';
+      if (!id) continue;
+      const local = localById.get(id);
+      // Normalizzo il payload remoto: era il body inviato in sendToExcel,
+      // quindi ha vinoCodice (non vino), vascheDaScaricare (non vaschePartenza), ecc.
+      // Lo riconverto allo shape interno usato da entries.
+      const normalized = normalizeRemoteEntry(re);
+      if (!local) {
+        entries.push({ ...normalized, sent: true, foto: [] });
+        added++;
+      } else if (local.sent) {
+        // Conservo foto e flag locali
+        const merged = { ...local, ...normalized, foto: local.foto || [], sent: true };
+        const idx = entries.findIndex(e => String(e.id) === id);
+        entries[idx] = merged;
+        updated++;
+      } else {
+        skipped++;
+      }
+    }
+
+    persist();
+    renderList();
+    if (typeof renderStato === 'function') renderStato();
+
+    const now = new Date();
+    localStorage.setItem('cantina-last-fetch', now.toISOString());
+    updateLastFetchLabel();
+
+    let msg = `✅ ${added} nuove · ${updated} aggiornate`;
+    if (skipped) msg += ` · ${skipped} draft conservati`;
+    toast(msg);
+  } catch (err) {
+    console.error('fetchFromSheet error:', err);
+    toast('❌ Scarico fallito: ' + (err.message || err));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = originalText; }
+  }
+}
+
+// Riconverte il payload "remoto" allo shape interno usato dall'app.
+// Per le registrazioni vecchie (senza rawJson nel foglio) i campi composti
+// (vasche, prodotti) arrivano come STRINGHE: le ri-parso in array.
+function normalizeRemoteEntry(re) {
+  const asArrayOrParseVasche = (v) => {
+    if (Array.isArray(v)) return v;
+    if (typeof v === 'string') return parseVascheString(v);
+    return [];
+  };
+  const asArrayOrParseProdotti = (v) => {
+    if (Array.isArray(v)) return v;
+    if (typeof v === 'string') return parseProdottiString(v);
+    return [];
+  };
+  return {
+    id: typeof re.id === 'string' ? Number(re.id) || re.id : re.id,
+    data: re.data || '',
+    ora: re.ora || '',
+    opCode: re.codiceOperazione || re.opCode || '',
+    opDesc: re.operazione || re.opDesc || '',
+    opGruppo: re.gruppo || re.opGruppo || '',
+    vaschePartenza: asArrayOrParseVasche(re.vascheDaScaricare || re.vaschePartenza),
+    vascheArrivo:   asArrayOrParseVasche(re.vascheDaCaricare || re.vascheArrivo),
+    prodottiMateriali: asArrayOrParseProdotti(re.prodottiMateriali),
+    vino: re.vinoCodice || re.vino || '',
+    annata: re.annata || '',
+    codiceOrigine: re.codiceOrigine || '',
+    qta: re.quantitaVinoHl || re.qta || '',
+    operatore: re.operatore || '',
+    note: re.note || '',
+    statoLavorazione: re.statoLavorazione || '',
+    createdAt: re.registratoIl || re.createdAt || ''
+  };
+}
+
+// Parsa "S05: 12.5 hl + S07: 10.00 hl" → [{vasca:'S05', quantita:'12.5'}, ...]
+function parseVascheString(str) {
+  if (!str) return [];
+  const parts = String(str).split(' + ').map(p => p.trim()).filter(Boolean);
+  return parts.map(part => {
+    const m = part.match(/^(\S+):\s*([\d.,]+)\s*hl\s*$/i);
+    if (m) return { vasca: m[1], quantita: m[2].replace(',', '.') };
+    // Senza quantità: solo codice vasca
+    return { vasca: part, quantita: '' };
+  }).filter(x => x.vasca);
+}
+
+// Parsa "Metabisolfito: 5,00 g/hl (125,00 g) + ..." → array di prodotti
+function parseProdottiString(str) {
+  if (!str) return [];
+  const parts = String(str).split(' + ').map(p => p.trim()).filter(Boolean);
+  return parts.map(part => {
+    // Pattern: "Nome: dose unita (totale unitaTotale)"  oppure  "Nome: dose unita"  oppure  "Nome"
+    const m = part.match(/^(.+?)(?::\s*([\d.,]+)\s*(\S+?))?(?:\s*\(\s*([\d.,]+)(?:\s+(\S+?))?\s*\))?\s*$/);
+    if (!m) return { descrizione: part, gruppo: '', unita: '', dose: '', totale: '', unitaTotale: '' };
+    return {
+      descrizione: (m[1] || '').trim(),
+      gruppo: '',
+      dose: m[2] || '',
+      unita: m[3] || '',
+      totale: m[4] || '',
+      unitaTotale: m[5] || ''
+    };
+  }).filter(x => x.descrizione);
+}
+
+function updateLastFetchLabel() {
+  const el = document.getElementById('last-fetch');
+  if (!el) return;
+  const iso = localStorage.getItem('cantina-last-fetch');
+  if (!iso) { el.textContent = ''; return; }
+  const d = new Date(iso);
+  const fmt = d.toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  el.textContent = `Ultima sincronizzazione cloud: ${fmt}`;
+}
+
+
+// ===== STATO VASCHE: motore replay + render =====
+function _parseHl(v) {
+  if (v === null || v === undefined || v === '') return 0;
+  const n = parseFloat(String(v).replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+
+function formatDateShort(d) {
+  if (!d) return '';
+  const parts = d.split('-');
+  return parts.length === 3 ? `${parts[2]}/${parts[1]}` : d;
+}
+
+// Restituisce array di stringhe-warning per l'entry che si sta per salvare.
+// Usato in saveEntry per chiedere conferma prima di persistere.
+function checkEntryWarnings(opGruppo, vaschePartenza, vascheArrivo, vino, annata) {
+  const warnings = [];
+  const isTravaso = TRAVASO_GRUPPI.includes(opGruppo);
+  const isScarico = opGruppo === 'SCARICHI';
+  const isCarico  = opGruppo === 'CARICHI';
+  const movePart  = isTravaso || isScarico;
+  const moveArr   = isTravaso || isCarico;
+  if (!movePart && !moveArr) return warnings;
+
+  // In modalita modifica, escludiamo la vecchia versione dell'entry dal replay
+  const { state } = computeCantinaState(editingEntryId);
+
+  // Vasche di partenza: vuote / scarico eccessivo
+  if (movePart && !isCarico) {
+    for (const v of (vaschePartenza || [])) {
+      const cur = state[v.vasca];
+      const q = parseHl(v.quantita);
+      if (!cur || cur.quantita <= 0.001) {
+        warnings.push(`• ${v.vasca}: la vasca risulta VUOTA, ma stai facendo un'operazione di scarico`);
+      } else if (q > cur.quantita + 0.01) {
+        warnings.push(`• ${v.vasca}: scarico ${formatHl(q)} hl ma la vasca ne contiene solo ${formatHl(cur.quantita)} hl`);
+      }
+    }
+  }
+
+  // Vasche di arrivo: mischio di vini diversi
+  if (moveArr) {
+    const targetVasche = isCarico ? (vaschePartenza || []) : (vascheArrivo || []);
+    for (const v of targetVasche) {
+      const cur = state[v.vasca];
+      if (cur && cur.vino && vino && cur.vino !== vino) {
+        const curLabel = `${cur.vino}${cur.annata ? ' ' + cur.annata : ''}`;
+        const newLabel = `${vino}${annata ? ' ' + annata : ''}`;
+        warnings.push(`• ${v.vasca}: già contiene ${curLabel}, stai caricando ${newLabel} (mischio)`);
+      }
+    }
+  }
+
+  return warnings;
+}
+
+function computeCantinaState(skipEntryId) {
+  const state = {};
+  const warnings = [];
+
+  const sorted = [...entries].sort((a, b) => {
+    const ka = (a.data || '') + 'T' + (a.ora || '');
+    const kb = (b.data || '') + 'T' + (b.ora || '');
+    if (ka !== kb) return ka.localeCompare(kb);
+    return String(a.createdAt || a.id).localeCompare(String(b.createdAt || b.id));
+  });
+
+  const skipStr = skipEntryId != null ? String(skipEntryId) : null;
+  for (const e of sorted) {
+    // Durante la modifica di una entry, escludila dal replay per evitare
+    // di contarla due volte (la vecchia versione e' ancora in entries quando
+    // la save chiama questa funzione per validare la nuova versione).
+    if (skipStr !== null && String(e.id) === skipStr) continue;
+    const gruppo = e.opGruppo || '';
+    const isTravaso = gruppo === 'TRAVASI' || gruppo === 'TRAVASI VENDEMMIA';
+    const isScarico = gruppo === 'SCARICHI';
+    const isCarico  = gruppo === 'CARICHI';
+    const movePart  = isTravaso || isScarico;
+    const moveArr   = isTravaso || isCarico;
+    const statoLav  = e.statoLavorazione || '';
+
+    // AGGIUNTE / OPERAZIONI senza movim. / SCRITTURE:
+    // Di base NESSUNA modifica allo stato cantina — solo registrazione.
+    // ECCEZIONE: PSP e COL cambiano lo stato di lavorazione delle vasche
+    // di partenza (in spumantizzazione / sotto colla), per qualsiasi numero di vasche.
+    if (!movePart && !moveArr) {
+      if (OPERAZIONI_CAMBIA_STATO.has(e.opCode) && statoLav) {
+        for (const v of (e.vaschePartenza || [])) {
+          const code = typeof v === 'string' ? v : v.vasca;
+          if (state[code]) state[code].statoLavorazione = statoLav;
+        }
+      }
+      continue;
+    }
+
+    let vinoCode      = e.vino || '';
+    let annata        = e.annata || '';
+    let codiceOrigine = e.codiceOrigine || '';
+
+    // NOTA UI: per CARICHI il form non mostra il campo "vasche da caricare"
+    // separato — le vasche caricate finiscono in vaschePartenza. Quindi
+    // per i Carichi NON sottraggo da vaschePartenza, ma li tratto come arrivo.
+    if (movePart && !isCarico) {
+      for (const v of (e.vaschePartenza || [])) {
+        const code = typeof v === 'string' ? v : v.vasca;
+        const q    = typeof v === 'string' ? 0 : _parseHl(v.quantita);
+        const cur  = state[code];
+        if (!cur || cur.quantita <= 0.001) {
+          warnings.push({ entryId: e.id, vasca: code, severity: 'warn',
+            msg: `${e.opCode} ${formatDateShort(e.data)}: operazione su ${code} ma risulta vuota` });
+        } else if (q > cur.quantita + 0.01) {
+          warnings.push({ entryId: e.id, vasca: code, severity: 'error',
+            msg: `${e.opCode} ${formatDateShort(e.data)}: scarico ${q.toFixed(2)} hl da ${code} (contiene ${cur.quantita.toFixed(2)} hl)` });
+        }
+        if (isTravaso && cur && !vinoCode) {
+          vinoCode      = cur.vino || '';
+          annata        = annata        || cur.annata || '';
+          codiceOrigine = codiceOrigine || cur.codiceOrigine || '';
+        }
+        if (cur) {
+          cur.quantita = Math.max(0, cur.quantita - q);
+          if (cur.quantita <= 0.001) delete state[code];
+        }
+      }
+    }
+
+    if (moveArr) {
+      const linea     = LINEE_PRODOTTI.find(x => x.codice === vinoCode);
+      const vinoDesc  = linea ? linea.descrizione : '';
+      const colore    = linea ? (linea.colore || '') : '';
+      // Per i TRAVASI le vasche di arrivo sono in vascheArrivo.
+      // Per i CARICHI sono in vaschePartenza (il form non separa i due campi).
+      const arrivoList = isCarico ? (e.vaschePartenza || []) : (e.vascheArrivo || []);
+      for (const v of arrivoList) {
+        const code = typeof v === 'string' ? v : v.vasca;
+        const q    = typeof v === 'string' ? 0 : _parseHl(v.quantita);
+        const cur  = state[code];
+        const vd   = VASCHE.find(vv => vv.vasca === code);
+        if (cur && cur.vino && vinoCode && cur.vino !== vinoCode) {
+          warnings.push({ entryId: e.id, vasca: code, severity: 'warn',
+            msg: `${e.opCode} ${formatDateShort(e.data)}: mischio in ${code} — c'era ${cur.vino} ${cur.annata||''}, arriva ${vinoCode} ${annata||''} (vince ultimo)` });
+        }
+        const newQta = (cur ? cur.quantita : 0) + q;
+        if (vd && vd.capacita && newQta > vd.capacita + 0.05) {
+          warnings.push({ entryId: e.id, vasca: code, severity: 'warn',
+            msg: `${e.opCode} ${formatDateShort(e.data)}: ${code} oltre capacità — ${newQta.toFixed(2)} hl > ${vd.capacita} hl` });
+        }
+        state[code] = {
+          vasca: code,
+          vino: vinoCode || (cur && cur.vino) || '',
+          vinoDescrizione: vinoDesc || (cur && cur.vinoDescrizione) || '',
+          colore: colore || (cur && cur.colore) || '',
+          annata: annata || (cur && cur.annata) || '',
+          codiceOrigine: codiceOrigine || (cur && cur.codiceOrigine) || '',
+          statoLavorazione: statoLav || (cur && cur.statoLavorazione) || '',
+          quantita: newQta,
+          ultimaOp: { id: e.id, data: e.data, ora: e.ora, opCode: e.opCode, opDesc: e.opDesc }
+        };
+      }
+    }
+  }
+  return { state, warnings };
+}
+
+let statoFilter = 'all';
+let statoUbicazione = 'all';
+let statoStato = 'piene-e-scolme'; // default: la vista "giacenza" normale
+
+// Ritorna 'vuota' | 'scolma' | 'piena' | 'errore' per una coppia (quantita, capacita)
+function getFillState(quantita, capacita) {
+  if (!(quantita > 0.001)) return 'vuota';
+  if (!capacita || capacita <= 0) return 'scolma';
+  const pct = (quantita / capacita) * 100;
+  if (pct > 100.5)  return 'errore';
+  if (pct >= 99.99) return 'piena';
+  return 'scolma';
+}
+
+function renderStatoFilters() {
+  // Barra "Stato vasca" (riempimento)
+  const barS = document.getElementById('stato-stato-bar');
+  if (barS) {
+    const statoOpts = [
+      { k: 'tutte',             l: 'Tutte' },
+      { k: 'piene-e-scolme',    l: 'Piene e Scolme' },
+      { k: 'piene',             l: 'Piene' },
+      { k: 'scolme',            l: 'Scolme' },
+      { k: 'vuote',             l: 'Vuote' },
+      { k: 'errore',            l: 'Errore' }
+    ];
+    barS.innerHTML = statoOpts.map(f =>
+      `<button class="chip ${statoStato === f.k ? 'active' : ''}" onclick="setStatoStato('${f.k}')">${f.l}</button>`
+    ).join('');
+  }
+
+  // Barra tipo contenitore
+  const bar = document.getElementById('stato-filter-bar');
+  if (bar) {
+    const filters = [
+      { k: 'all', l: 'Tutte' },
+      { k: 'A',   l: 'Acciaio' },
+      { k: 'L',   l: 'Botti grandi' },
+      { k: 'T',   l: 'Tonneau' },
+      { k: 'B',   l: 'Barrique' },
+      { k: 'P',   l: 'Botti piccole' },
+      { k: 'F',   l: 'Anfore' },
+      { k: 'V',   l: 'Vetro' },
+      { k: 'R',   l: 'Resina' }
+    ];
+    bar.innerHTML = filters.map(f =>
+      `<button class="chip ${statoFilter === f.k ? 'active' : ''}" onclick="setStatoFilter('${f.k}')">${f.l}</button>`
+    ).join('');
+  }
+
+  // Barra ubicazioni — ordine fisso (Hauptkeller, Ansetz, Schiffskeller poi le altre alfabetiche)
+  const barU = document.getElementById('stato-ubicazione-bar');
+  if (barU) {
+    const ordineFisso = ['Hauptkeller', 'Ansetz', 'Schiffskeller'];
+    const tutte = [...new Set(VASCHE.map(v => v.ubicazione).filter(Boolean))];
+    const altre = tutte.filter(u => !ordineFisso.includes(u)).sort();
+    const ordered = [...ordineFisso.filter(u => tutte.includes(u)), ...altre];
+    barU.innerHTML = `<button class="chip ${statoUbicazione === 'all' ? 'active' : ''}" onclick="setStatoUbicazione('all')">Tutte ubicazioni</button>` +
+      ordered.map(u =>
+        `<button class="chip ${statoUbicazione === u ? 'active' : ''}" onclick="setStatoUbicazione('${escapeAttr(u)}')">${escapeHtml(u)}</button>`
+      ).join('');
+  }
+}
+
+function setStatoFilter(k) {
+  statoFilter = k;
+  renderStatoFilters();
+  renderStato();
+}
+
+function setStatoUbicazione(u) {
+  statoUbicazione = u;
+  renderStatoFilters();
+  renderStato();
+}
+
+function setStatoStato(s) {
+  statoStato = s;
+  renderStatoFilters();
+  renderStato();
+}
+
+function renderStato() {
+  const { state, warnings } = computeCantinaState();
+  const q = (document.getElementById('stato-search')?.value || '').trim().toLowerCase();
+
+  // Parto da TUTTE le 193 vasche, marcando quelle senza vino come vuote
+  let items = VASCHE.map(vd => {
+    const s = state[vd.vasca];
+    return s ? s : {
+      vasca: vd.vasca,
+      vino: '', vinoDescrizione: '', colore: '',
+      annata: '', codiceOrigine: '', statoLavorazione: '',
+      quantita: 0, ultimaOp: null
+    };
+  });
+
+  // Filtro: stato di riempimento
+  if (statoStato !== 'tutte') {
+    items = items.filter(s => {
+      const vd = VASCHE.find(v => v.vasca === s.vasca);
+      const fs = getFillState(s.quantita, vd ? vd.capacita : 0);
+      if (statoStato === 'piene-e-scolme') return fs === 'piena' || fs === 'scolma';
+      if (statoStato === 'piene')          return fs === 'piena';
+      if (statoStato === 'scolme')         return fs === 'scolma';
+      if (statoStato === 'vuote')          return fs === 'vuota';
+      if (statoStato === 'errore')         return fs === 'errore';
+      return true;
+    });
+  }
+
+  // Filtro: tipo contenitore
+  if (statoFilter !== 'all') {
+    items = items.filter(s => {
+      const vd = VASCHE.find(v => v.vasca === s.vasca);
+      if (!vd) return false;
+      return (vd.tipo || '').charAt(0).toUpperCase() === statoFilter;
+    });
+  }
+
+  // Filtro: ubicazione
+  if (statoUbicazione !== 'all') {
+    items = items.filter(s => {
+      const vd = VASCHE.find(v => v.vasca === s.vasca);
+      return vd && vd.ubicazione === statoUbicazione;
+    });
+  }
+
+  // Ricerca testuale (vasca, vino, codice origine, annata, colore)
+  if (q) {
+    items = items.filter(s =>
+      s.vasca.toLowerCase().includes(q) ||
+      (s.vinoDescrizione || '').toLowerCase().includes(q) ||
+      (s.vino || '').toLowerCase().includes(q) ||
+      (s.codiceOrigine || '').toLowerCase().includes(q) ||
+      String(s.annata || '').includes(q) ||
+      (s.colore || '').toLowerCase().includes(q)
+    );
+  }
+  items.sort((a, b) => a.vasca.localeCompare(b.vasca));
+
+  // Warnings banner
+  const elWarn = document.getElementById('stato-warnings');
+  const errs = warnings.filter(w => w.severity === 'error').slice(-5);
+  const wrns = warnings.filter(w => w.severity === 'warn').slice(-5);
+  let warnHtml = '';
+  if (errs.length) {
+    warnHtml += `<div class="warnings-banner err"><strong>⚠️ ${errs.length} errori recenti nel log</strong><ul>` +
+      errs.map(w => `<li>${escapeHtml(w.msg)}</li>`).join('') + `</ul></div>`;
+  }
+  if (wrns.length) {
+    warnHtml += `<div class="warnings-banner"><strong>${wrns.length} avvisi recenti</strong><ul>` +
+      wrns.map(w => `<li>${escapeHtml(w.msg)}</li>`).join('') + `</ul></div>`;
+  }
+  elWarn.innerHTML = warnHtml;
+
+  // Summary
+  const totaleHl = items.reduce((s, x) => s + x.quantita, 0);
+  const nVisible = items.length;
+  const nWithWine = items.filter(s => s.quantita > 0.001).length;
+  document.getElementById('stato-summary').innerHTML = `
+    <span class="pill-stat"><strong>${nVisible}</strong> vasc${nVisible === 1 ? 'a' : 'he'} in vista</span>
+    ${nWithWine > 0 ? `<span class="pill-stat"><strong>${totaleHl.toFixed(2)}</strong> hl</span>` : ''}
+    ${errs.length ? `<span class="pill-stat err"><strong>${warnings.filter(w => w.severity==='error').length}</strong> errori tot.</span>` : ''}
+    ${wrns.length ? `<span class="pill-stat warn"><strong>${warnings.filter(w => w.severity==='warn').length}</strong> avvisi tot.</span>` : ''}
+  `;
+
+  // Card list
+  const listHtml = items.map(s => {
+    const vd = VASCHE.find(v => v.vasca === s.vasca);
+    const cap = vd && vd.capacita ? vd.capacita : 0;
+    const fs = getFillState(s.quantita, cap);
+
+    // Card "Vuota": compatta, subdued
+    if (fs === 'vuota') {
+      const tipoStr = vd && vd.tipo ? vd.tipo : '';
+      const ubicStr = vd && vd.ubicazione ? vd.ubicazione : '';
+      const capStr  = cap ? `cap. ${cap.toFixed(2)} hl` : '';
+      const metaParts = [tipoStr, ubicStr, capStr].filter(Boolean);
+      return `
+        <div class="vasca-card vuota">
+          <div class="vasca-card-head">
+            <span class="v-code">${escapeHtml(s.vasca)}</span>
+            <span class="v-qta">Vuota</span>
+          </div>
+          ${metaParts.length ? `<div class="v-meta">${escapeHtml(metaParts.join(' · '))}</div>` : ''}
+        </div>`;
+    }
+
+    // Card "piena" / "scolma" / "errore"
+    const pct = cap ? (s.quantita / cap) * 100 : 0;
+    const pctCap = Math.min(100, pct);
+    let cardClass = 'vasca-card';
+    if (fs === 'errore') cardClass += ' overfull';
+    else if (fs === 'piena') cardClass += ' full';
+    return `
+      <div class="${cardClass}">
+        <div class="vasca-card-head">
+          <span class="v-code">${escapeHtml(s.vasca)}</span>
+          <span class="v-qta">${s.quantita.toFixed(2)} hl${cap ? ` / ${cap.toFixed(2)} hl <span class="pct">(${pct.toFixed(0)}%)</span>` : ''}</span>
+        </div>
+        <div class="v-vino">${s.colore ? `<span class="colore-chip ${escapeAttr(s.colore)}">${escapeHtml(s.colore)}</span>` : ''}${escapeHtml(s.vinoDescrizione || s.vino || '—')}${s.annata ? `<span class="annata">· ${escapeHtml(s.annata)}</span>` : ''}</div>
+        ${s.codiceOrigine ? `<div class="v-origine">${escapeHtml(s.codiceOrigine)}</div>` : ''}
+        ${s.statoLavorazione ? `<div class="v-stato">⚙️ ${escapeHtml(s.statoLavorazione)}</div>` : ''}
+        ${s.ultimaOp ? `<div class="v-meta">Ultima: ${escapeHtml(s.ultimaOp.opCode)} · ${escapeHtml(formatDate(s.ultimaOp.data))}${s.ultimaOp.ora ? ' ' + escapeHtml(s.ultimaOp.ora) : ''}</div>` : ''}
+        <div class="v-bar"><div class="v-bar-fill" style="width:${pctCap}%"></div></div>
+      </div>`;
+  }).join('');
+  document.getElementById('stato-list').innerHTML = listHtml ||
+    '<div class="empty"><div class="icon">🛢️</div>Nessuna vasca con questi filtri.</div>';
+
+  const tutte = Object.values(state).filter(s => s.quantita > 0.001);
+  const perLinea = {};
+  tutte.forEach(s => {
+    const key = (s.vino || '?') + '|' + (s.annata || '');
+    if (!perLinea[key]) {
+      perLinea[key] = { vino: s.vino, vinoDescrizione: s.vinoDescrizione, annata: s.annata, quantita: 0, numVasche: 0 };
+    }
+    perLinea[key].quantita += s.quantita;
+    perLinea[key].numVasche += 1;
+  });
+  const lineeArr = Object.values(perLinea).sort((a, b) => b.quantita - a.quantita);
+  document.getElementById('stato-totali-linea').innerHTML = lineeArr.map(l => `
+    <div class="linea-row">
+      <div>
+        <div class="l-name">${escapeHtml(l.vinoDescrizione || l.vino || '— non specificato')}</div>
+        <div class="l-meta">${l.annata ? 'Annata ' + escapeHtml(l.annata) + ' · ' : ''}${l.numVasche} vasc${l.numVasche === 1 ? 'a' : 'he'}</div>
+      </div>
+      <div class="l-qta">${l.quantita.toFixed(2)} hl</div>
+    </div>`).join('') || '<div class="empty" style="padding:20px;">—</div>';
+}
+
+// Memoria di cosa abbiamo auto-compilato (per poterlo poi togliere se l'utente
+// rimuove la vasca da cui era stato copiato). Se il valore del campo coincide
+// con questa memoria, sappiamo che e' "auto" e non manuale → safe to clear.
+let lastAutofill = { vino: '', annata: '', codiceOrigine: '', statoLavorazione: '' };
+
+function autofillFromVasca(vascaCode) {
+  if (!vascaCode) return;
+  const { state } = computeCantinaState();
+  const s = state[vascaCode];
+  if (!s || s.quantita <= 0.001) return;
+  const fVino = document.getElementById('f-vino');
+  const fAnno = document.getElementById('f-annata');
+  const fCod  = document.getElementById('f-codice');
+  const touched = [];
+  if (fVino && !fVino.value && s.vino)              { fVino.value = s.vino;          lastAutofill.vino = s.vino;                   touched.push('vino'); }
+  if (fAnno && !fAnno.value && s.annata)            { fAnno.value = s.annata;        lastAutofill.annata = s.annata;               touched.push('annata'); }
+  if (fCod  && !fCod.value.trim() && s.codiceOrigine){ fCod.value  = s.codiceOrigine; lastAutofill.codiceOrigine = s.codiceOrigine; touched.push('codice'); }
+  if (touched.length) toast(`✨ Pre-compilato da ${vascaCode}: ${touched.join(', ')}`);
+}
+
+// Pulisce i campi che sono stati riempiti dall'autofill (e che l'utente non ha modificato a mano).
+// Da chiamare quando l'utente svuota completamente la lista vasche di partenza.
+function clearAutofilledFields() {
+  const fVino = document.getElementById('f-vino');
+  const fAnno = document.getElementById('f-annata');
+  const fCod  = document.getElementById('f-codice');
+  const fStato = document.getElementById('f-stato');
+  const cleared = [];
+  if (fVino && lastAutofill.vino && fVino.value === lastAutofill.vino) {
+    fVino.value = ''; cleared.push('vino');
+  }
+  if (fAnno && lastAutofill.annata && fAnno.value === lastAutofill.annata) {
+    fAnno.value = ''; cleared.push('annata');
+  }
+  if (fCod && lastAutofill.codiceOrigine && fCod.value === lastAutofill.codiceOrigine) {
+    fCod.value = ''; cleared.push('codice');
+  }
+  if (fStato && lastAutofill.statoLavorazione && !fStato.disabled && fStato.value === lastAutofill.statoLavorazione) {
+    fStato.value = ''; cleared.push('stato');
+  }
+  lastAutofill = { vino: '', annata: '', codiceOrigine: '', statoLavorazione: '' };
+  if (cleared.length) toast(`🧹 Ripuliti i campi auto: ${cleared.join(', ')}`);
+}
+
+
+// ===== CODICE ORIGINE WIZARD =====
+let wizProdottoType = 'vitigno';
+let wizAggiunte = []; // array di codici aggiunte selezionati nell'ordine
+let wizCampi = [];    // array di codici campo (full name) selezionati nell'ordine
+
+function openCodiceWizard() {
+  document.getElementById('codice-modal').classList.add('show');
+  // Popola dropdown se non già fatto
+  const selVit = document.getElementById('wiz-vitigno');
+  if (selVit.options.length <= 1) {
+    VITIGNI.forEach(v => {
+      const o = document.createElement('option');
+      o.value = v.codice;
+      o.textContent = `${v.codice} — ${v.nome}`;
+      selVit.appendChild(o);
+    });
+  }
+  const selPro = document.getElementById('wiz-pronto');
+  if (selPro.options.length <= 1) {
+    LINEE_PRODOTTI.forEach(l => {
+      const o = document.createElement('option');
+      o.value = l.codice;
+      o.textContent = `${l.codice} — ${l.descrizione}`;
+      selPro.appendChild(o);
+    });
+  }
+  const selUn = document.getElementById('wiz-unita');
+  if (selUn.options.length <= 1) {
+    UNITA_PROD.forEach(u => {
+      const o = document.createElement('option');
+      o.value = u.codice;
+      o.textContent = `${u.codice} — ${u.nome}`;
+      selUn.appendChild(o);
+    });
+    const oCustom = document.createElement('option');
+    oCustom.value = '__custom__';
+    oCustom.textContent = '✏️  Altro fornitore (2 lettere)…';
+    selUn.appendChild(oCustom);
+  }
+  // Default annata = ultima cifra anno corrente
+  const annataInput = document.getElementById('wiz-annata');
+  if (!annataInput.value) {
+    const _now = new Date();
+    const _year = _now.getMonth() >= 8 ? _now.getFullYear() : _now.getFullYear() - 1;
+    annataInput.value = String(_year).slice(-1);
+  }
+  // Mostra campo VF solo se unità = 3
+  toggleVFSection();
+  renderWizAggiunte();
+  renderWizCampi();
+  updateCodicePreview();
+}
+
+function closeCodiceWizard() {
+  document.getElementById('codice-modal').classList.remove('show');
+}
+
+function switchProdottoType(type) {
+  wizProdottoType = type;
+  document.getElementById('pill-vitigno').classList.toggle('active', type === 'vitigno');
+  document.getElementById('pill-pronto').classList.toggle('active', type === 'pronto');
+  document.getElementById('wiz-vitigno').classList.toggle('hidden', type !== 'vitigno');
+  document.getElementById('wiz-pronto').classList.toggle('hidden', type !== 'pronto');
+  updateCodicePreview();
+}
+
+function onUnitaChange() {
+  const unitaSel = document.getElementById('wiz-unita').value;
+  const customField = document.getElementById('wiz-unita-custom');
+  if (unitaSel === '__custom__') {
+    customField.classList.remove('hidden');
+    setTimeout(() => customField.focus(), 50);
+  } else {
+    customField.classList.add('hidden');
+    customField.value = '';
+  }
+  toggleVFSection();
+  updateCodicePreview();
+}
+
+function getUnitaValue() {
+  const sel = document.getElementById('wiz-unita').value;
+  if (sel === '__custom__') {
+    const c = document.getElementById('wiz-unita-custom').value.trim();
+    return c.length === 2 ? c : '';
+  }
+  return sel;
+}
+
+function toggleVFSection() {
+  const unita = getUnitaValue();
+  document.getElementById('wiz-section-vf').classList.toggle('hidden', unita !== '3');
+}
+
+function renderWizAggiunte() {
+  const el = document.getElementById('wiz-aggiunte-chips');
+  if (wizAggiunte.length === 0) {
+    el.innerHTML = '<span style="font-size:12px;color:#8a7868;">Nessuna aggiunta selezionata</span>';
+    return;
+  }
+  el.innerHTML = wizAggiunte.map((codice, i) => `
+    <span class="aggiunta-chip">
+      ${escapeHtml(codice)}
+      <button class="x" onclick="removeAggiunta(${i})">×</button>
+    </span>
+  `).join('');
+}
+
+function removeAggiunta(i) {
+  wizAggiunte.splice(i, 1);
+  renderWizAggiunte();
+  updateCodicePreview();
+}
+
+function openAggPicker() {
+  const overlay = document.getElementById('agg-picker');
+  const list = document.getElementById('agg-picker-list');
+  // Group by gruppo
+  const groups = {};
+  AGGIUNTE_CODICE.forEach(a => {
+    if (!groups[a.gruppo]) groups[a.gruppo] = [];
+    groups[a.gruppo].push(a);
+  });
+  const order = ['Feccia','Origine','Selezione','Tipologia','Torchiatura','Movimento'];
+  list.innerHTML = '<button class="btn btn-ghost" onclick="closeAggPicker()" style="width:100%;text-align:right;">Chiudi</button>' +
+    order.filter(g => groups[g]).map(g => `
+      <div class="grp-h">${g}</div>
+      ${groups[g].map(a => `
+        <div class="agg-item ${wizAggiunte.includes(a.codice) ? 'selected' : ''}"
+             onclick="toggleAggiunta('${escapeAttr(a.codice)}')">
+          <span class="code">${escapeHtml(a.codice)}</span>
+          <span class="desc">${escapeHtml(a.descrizione)}</span>
+        </div>
+      `).join('')}
+    `).join('');
+  overlay.classList.add('show');
+}
+
+function closeAggPicker() {
+  document.getElementById('agg-picker').classList.remove('show');
+}
+
+function toggleAggiunta(codice) {
+  const i = wizAggiunte.indexOf(codice);
+  if (i === -1) wizAggiunte.push(codice);
+  else wizAggiunte.splice(i, 1);
+  renderWizAggiunte();
+  updateCodicePreview();
+  openAggPicker(); // re-render con stato aggiornato
+}
+
+
+// ===== CAMPO (step 5) =====
+function renderWizCampi() {
+  const el = document.getElementById('wiz-campi-chips');
+  if (!el) return;
+  if (wizCampi.length === 0) {
+    el.innerHTML = '<span style="font-size:12px;color:#8a7868;">Nessun campo selezionato</span>';
+    return;
+  }
+  el.innerHTML = wizCampi.map((codice, i) => {
+    const c = CAMPI.find(x => x.codice === codice);
+    if (!c) return '';
+    return `
+      <span class="aggiunta-chip" title="${escapeAttr(c.italiano)}">
+        ${escapeHtml(c.abbr)} <span style="opacity:.7;font-weight:500;">· ${escapeHtml(c.italiano)}</span>
+        <button class="x" onclick="removeCampo(${i})">×</button>
+      </span>`;
+  }).join('');
+}
+
+function removeCampo(i) {
+  wizCampi.splice(i, 1);
+  renderWizCampi();
+  updateCodicePreview();
+}
+
+function openCampoPicker() {
+  const overlay = document.getElementById('campo-picker');
+  const list = document.getElementById('campo-picker-list');
+  // Raggruppo per prima parola del codice (SCHWARHOF, KOHLERHOF, ecc.)
+  const groups = {};
+  CAMPI.forEach(c => {
+    const g = (c.codice || '').split(' ')[0] || 'ALTRO';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(c);
+  });
+  const order = ['SCHWARHOF', 'KOHLERHOF', 'KALTER', 'IHLDERHOF'];
+  const keys = [...order.filter(k => groups[k]), ...Object.keys(groups).filter(k => !order.includes(k))];
+  list.innerHTML = '<button class="btn btn-ghost" onclick="closeCampoPicker()" style="width:100%;text-align:right;">Chiudi</button>' +
+    keys.map(g => `
+      <div class="grp-h">${escapeHtml(g)}</div>
+      ${groups[g].map(c => `
+        <div class="agg-item ${wizCampi.includes(c.codice) ? 'selected' : ''}"
+             onclick="toggleCampo('${escapeAttr(c.codice)}')">
+          <span class="code">${escapeHtml(c.abbr)}</span>
+          <span class="desc" style="display:flex;flex-direction:column;gap:1px;line-height:1.2;">
+            <span>${escapeHtml(c.codice)}</span>
+            <span style="font-size:11px;color:#8a7868;">${escapeHtml(c.italiano)}</span>
+          </span>
+        </div>
+      `).join('')}
+    `).join('');
+  overlay.classList.add('show');
+}
+
+function closeCampoPicker() {
+  document.getElementById('campo-picker').classList.remove('show');
+}
+
+function toggleCampo(codice) {
+  const i = wizCampi.indexOf(codice);
+  if (i === -1) wizCampi.push(codice);
+  else wizCampi.splice(i, 1);
+  renderWizCampi();
+  updateCodicePreview();
+  openCampoPicker();
+}
+
+// Restituisce le abbreviazioni dei campi selezionati, deduplicate, in ordine di prima selezione
+function campiAbbrUnique() {
+  const seen = new Set();
+  const out = [];
+  for (const codice of wizCampi) {
+    const c = CAMPI.find(x => x.codice === codice);
+    if (!c || !c.abbr) continue;
+    if (seen.has(c.abbr)) continue;
+    seen.add(c.abbr);
+    out.push(c.abbr);
+  }
+  return out;
+}
+
+// Anteposizione automatica dello "0" ai numeri vendemmia a una cifra (es. "5+12" -> "05+12")
+function padVendemmia(input) {
+  if (!input || !input.value) return;
+  const parts = input.value.split('+').map(p => p.trim());
+  const padded = parts.map(p => /^\d$/.test(p) ? '0' + p : p);
+  const newVal = padded.join('+');
+  if (newVal !== input.value) {
+    input.value = newVal;
+    updateCodicePreview();
+  }
+}
+
+function assembleCodice() {
+  const annata = document.getElementById('wiz-annata').value.trim();
+  const prodotto = wizProdottoType === 'vitigno'
+    ? document.getElementById('wiz-vitigno').value
+    : document.getElementById('wiz-pronto').value.trim().toUpperCase();
+  const unita = getUnitaValue();
+  const vendemmia = document.getElementById('wiz-vendemmia').value.trim();
+  const campiVF = document.getElementById('wiz-campi-vf').value.trim();
+  const clone = document.getElementById('wiz-clone').value.trim();
+
+  let code = '';
+  if (annata) code += annata;
+  if (prodotto) code += prodotto;
+  if (unita) code += unita;
+  if (vendemmia) code += vendemmia;
+  if (campiVF && unita === '3') code += '(' + campiVF + ')';
+  const campiAbbr = campiAbbrUnique();
+  if (campiAbbr.length > 0) code += campiAbbr.join('+');
+  if (wizAggiunte.length > 0) code += wizAggiunte.join('');
+  if (clone) code += clone;
+  return code;
+}
+
+function updateCodicePreview() {
+  toggleVFSection();
+  const code = assembleCodice();
+  const el = document.getElementById('codice-preview-text');
+  if (!code) {
+    el.classList.add('empty');
+    el.textContent = '— compila i campi —';
+  } else {
+    el.classList.remove('empty');
+    el.textContent = code;
+  }
+}
+
+function confirmCodice() {
+  const code = assembleCodice();
+  if (!code) { toast('⚠️ Compila almeno annata, vitigno e unità'); return; }
+  document.getElementById('f-codice').value = code;
+  closeCodiceWizard();
+  toast('✅ Codice inserito: ' + code);
+}
+
+function resetCodiceWizard() {
+  {
+    const _now = new Date();
+    const _year = _now.getMonth() >= 8 ? _now.getFullYear() : _now.getFullYear() - 1;
+    document.getElementById('wiz-annata').value = String(_year).slice(-1);
+  }
+  document.getElementById('wiz-vitigno').value = '';
+  document.getElementById('wiz-pronto').value = '';
+  document.getElementById('wiz-unita').value = '';
+  document.getElementById('wiz-unita-custom').value = '';
+  document.getElementById('wiz-unita-custom').classList.add('hidden');
+  document.getElementById('wiz-vendemmia').value = '';
+  document.getElementById('wiz-campi-vf').value = '';
+  document.getElementById('wiz-clone').value = '';
+  wizAggiunte = [];
+  wizCampi = [];
+  renderWizAggiunte();
+  renderWizCampi();
+  switchProdottoType('vitigno');
+  updateCodicePreview();
+}
+
+// ===== LIST =====
+function vascaLabel(item) {
+  // Backward compat: item may be a string (old entries) or {vasca, quantita}
+  const code = typeof item === 'string' ? item : item.vasca;
+  const qta = typeof item === 'string' ? null : item.quantita;
+  const v = VASCHE.find(x => x.vasca === code);
+  if (!v) return code;
+  if (qta && String(qta).trim()) return `${v.vasca} (${qta} hl)`;
+  return `${v.vasca} (${formatHl(v.capacita)} hl cap.)`;
+}
+
+function renderList() {
+  document.getElementById('stat-total').textContent = entries.length;
+  const today = new Date().toISOString().split('T')[0];
+  const weekAgo = new Date(Date.now() - 7*24*3600*1000).toISOString().split('T')[0];
+  document.getElementById('stat-today').textContent = entries.filter(e => e.data === today).length;
+  document.getElementById('stat-week').textContent = entries.filter(e => e.data >= weekAgo).length;
+  const pendingCount = entries.filter(e => !e.sent).length;
+  document.getElementById('stat-pending').textContent = pendingCount;
+  document.querySelector('.stat-pending').classList.toggle('empty', pendingCount === 0);
+  updateSyncUI();
+
+  const gruppi = ['all', ...new Set(entries.map(e => e.opGruppo))];
+  document.getElementById('filter-bar').innerHTML = gruppi.map(g => {
+    const label = g === 'all' ? 'Tutti' : escapeHtml(g);
+    const cls = currentFilter === g ? 'chip active' : 'chip';
+    return `<div class="${cls}" onclick="setFilter('${escapeAttr(g)}')">${label}</div>`;
+  }).join('');
+
+  const filtered = currentFilter === 'all' ? entries : entries.filter(e => e.opGruppo === currentFilter);
+  const list = document.getElementById('entries-list');
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="icon">📋</div><div>Nessuna registrazione</div></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(e => {
+    const partenza = (e.vaschePartenza || []).map(vascaLabel).join(', ');
+    const arrivo = (e.vascheArrivo || []).map(vascaLabel).join(', ');
+    const isTravaso = arrivo.length > 0;
+    return `
+    <div class="entry">
+      <div class="entry-head">
+        <span class="entry-type">${escapeHtml(e.opDesc)}${!e.sent ? '<span class="entry-pending-badge">da inviare</span>' : ''}</span>
+        <span class="entry-date">${formatDate(e.data)} ${e.ora || ''}</span>
+      </div>
+      <div class="entry-flow">
+        ${isTravaso ? `
+          <div class="row-line"><span class="label">DA</span><span class="vasche">${escapeHtml(partenza)}</span></div>
+          <div class="row-line"><span class="label">→ A</span><span class="vasche">${escapeHtml(arrivo)}</span></div>
+        ` : `
+          <div class="row-line"><span class="label">VASCA</span><span class="vasche">${escapeHtml(partenza)}</span></div>
+        `}
+      </div>
+      ${(e.vino || e.annata || e.codiceOrigine) ? `<div class="entry-meta">🍇 ${(() => {
+        const lin = LINEE_PRODOTTI.find(l => l.codice === e.vino);
+        const vinoTxt = lin ? `${lin.codice} — ${lin.descrizione}` : (e.vino || '');
+        const parts = [];
+        if (vinoTxt) parts.push(escapeHtml(vinoTxt));
+        if (e.annata) parts.push(`<span style="color:#6b5444;">${escapeHtml(e.annata)}</span>`);
+        if (e.codiceOrigine) parts.push(`<span style="color:#8a7868;">cod. ${escapeHtml(e.codiceOrigine)}</span>`);
+        return parts.join(' · ');
+      })()}</div>` : (e.prodotto ? `<div class="entry-meta">🍇 ${escapeHtml(e.prodotto)}</div>` : '')}
+      ${(e.prodottiMateriali && e.prodottiMateriali.length) ? `<div class="entry-meta">🧪 ${e.prodottiMateriali.map(p => {
+        if (p.dose && p.totale) return `${escapeHtml(p.descrizione)} ${escapeHtml(p.dose)} ${escapeHtml(p.unita)} (${escapeHtml(p.totale)} ${escapeHtml(totalUnit(p.unita))})`;
+        if (p.totale) return `${escapeHtml(p.descrizione)} ${escapeHtml(p.totale)} ${escapeHtml(p.unita.replace('/hl',''))}`;
+        if (p.dose) return `${escapeHtml(p.descrizione)} ${escapeHtml(p.dose)} ${escapeHtml(p.unita)}`;
+        if (p.quantita) return `${escapeHtml(p.descrizione)} ${escapeHtml(p.quantita)} ${escapeHtml(p.unita || '')}`;
+        return escapeHtml(p.descrizione);
+      }).join(' · ')}</div>` : ''}
+      ${e.qta ? `<div class="entry-meta">📦 ${escapeHtml(e.qta)} hl</div>` : ''}
+      ${e.operatore ? `<div class="entry-meta">👤 ${escapeHtml(e.operatore)}</div>` : ''}
+      ${e.note ? `<div class="entry-notes">"${escapeHtml(e.note)}"</div>` : ''}
+      ${e.foto && e.foto.length ? `<div class="entry-photos">${e.foto.map(p => `<img src="${p}" onclick="viewPhoto('${p}')">`).join('')}</div>` : ''}
+      <div class="entry-actions">
+        <button onclick="startEditEntry(${e.id})">✏️ Modifica</button>
+        <button class="delete" onclick="deleteEntry(${e.id})">🗑️ Elimina</button>
+      </div>
+    </div>
+  `;
+  }).join('');
+}
+function setFilter(t) { currentFilter = t; renderList(); }
+function deleteEntry(id) {
+  if (!confirm('Eliminare questa registrazione?')) return;
+  const entry = entries.find(e => e.id === id);
+  const wasSent = !!(entry && entry.sent);
+  entries = entries.filter(e => e.id !== id);
+  persist();
+  renderList();
+  if (typeof renderStato === 'function') renderStato();
+  if (wasSent) {
+    toast('Eliminato — sincronizzo cancellazione sul Sheet…');
+    deleteFromSheet(id);
+  } else {
+    toast('Eliminato');
+  }
+}
+
+// Propaga la cancellazione al Google Sheet via Apps Script (best effort)
+async function deleteFromSheet(id) {
+  try {
+    const res = await fetch(REGISTRO_API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'delete', id: id }),
+      redirect: 'follow'
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'errore lato server');
+    if (data.deleted > 0) toast(`🗑️ Cancellata anche dal Sheet (${data.deleted} riga${data.deleted === 1 ? '' : 'he'})`);
+    else toast('⚠️ Sheet: nessuna riga con quell id trovata');
+  } catch (err) {
+    console.error('deleteFromSheet error:', err);
+    toast(`⚠️ Cancellata in locale ma NON dal Sheet: ${err.message || err}`);
+  }
+}
+// Carica una entry esistente nel form Nuovo per modifica
+function startEditEntry(id) {
+  const entry = entries.find(e => e.id === id);
+  if (!entry) { toast('Registrazione non trovata'); return; }
+  editingEntryId = id;
+  // Compila operazione + ricalcola UI condizionale
+  const fOp = document.getElementById('f-op');
+  fOp.value = entry.opCode || '';
+  if (typeof onOpChange === 'function') onOpChange();
+  // Vasche
+  selectedPartenza = (entry.vaschePartenza || []).map(v => typeof v === 'string' ? { vasca: v, quantita: '' } : { vasca: v.vasca, quantita: v.quantita || '' });
+  selectedArrivo   = (entry.vascheArrivo   || []).map(v => typeof v === 'string' ? { vasca: v, quantita: '' } : { vasca: v.vasca, quantita: v.quantita || '' });
+  renderChips('partenza');
+  renderChips('arrivo');
+  // Prodotti
+  selectedProdotti = (entry.prodottiMateriali || []).map(p => ({ ...p }));
+  if (typeof renderProdottoChips === 'function') renderProdottoChips();
+  // Vino/annata/codice/stato
+  document.getElementById('f-vino').value = entry.vino || '';
+  document.getElementById('f-annata').value = entry.annata || '';
+  document.getElementById('f-codice').value = entry.codiceOrigine || '';
+  if (entry.statoLavorazione) {
+    const stato = document.getElementById('f-stato');
+    if (stato) {
+      const opts = [...stato.options].map(o => o.value);
+      if (!opts.includes(entry.statoLavorazione)) {
+        const opt = document.createElement('option');
+        opt.value = entry.statoLavorazione;
+        opt.textContent = entry.statoLavorazione;
+        stato.appendChild(opt);
+      }
+      stato.value = entry.statoLavorazione;
+    }
+  }
+  document.getElementById('f-data').value = entry.data || '';
+  document.getElementById('f-ora').value = entry.ora || '';
+  document.getElementById('f-operatore').value = entry.operatore || '';
+  document.getElementById('f-note').value = entry.note || '';
+  pendingPhotos = [...(entry.foto || [])];
+  if (typeof renderPhotoPreview === 'function') renderPhotoPreview();
+  switchTab('new');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  showEditBanner(entry);
+  toast(`✏️ Modifica registrazione ${formatDate(entry.data)} ${entry.ora || ''}`);
+}
+
+function showEditBanner(entry) {
+  let banner = document.getElementById('edit-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'edit-banner';
+    banner.style.cssText = 'background:#fdf2d0;color:#7a5a00;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:10px;';
+    const sect = document.getElementById('tab-new');
+    sect.insertBefore(banner, sect.firstChild);
+  }
+  banner.innerHTML = `<span>✏️ <strong>Stai modificando</strong> ${entry.opCode} del ${formatDate(entry.data)}${entry.sent ? ' (gia sincronizzata, verra ri-inviata)' : ''}</span><button onclick="cancelEditEntry()" style="background:none;border:1px solid #b07020;color:#7a5a00;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;">Annulla</button>`;
+}
+
+function hideEditBanner() {
+  const banner = document.getElementById('edit-banner');
+  if (banner) banner.remove();
+}
+
+function cancelEditEntry() {
+  editingEntryId = null;
+  hideEditBanner();
+  if (typeof resetForm === 'function') resetForm();
+  toast('Modifica annullata');
+}
+
+function viewPhoto(src) {
+  const w = window.open('', '_blank');
+  w.document.write(`<body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;"><img src="${src}" style="max-width:100%;max-height:100%;"></body>`);
+}
+
+// ===== EXPORT =====
+function exportCSV() {
+  if (entries.length === 0) { toast('Niente da esportare'); return; }
+  const headers = ['Data','Ora','Cod. Op','Operazione','Gruppo','Vasche da scaricare','Vasche da caricare','Vino (codice)','Linea prodotto','Annata','Codice origine','Prodotti e materiali','Quantità totale (hl)','Operatore','Note','Num. foto'];
+  const formatVasche = (arr) => (arr || []).map(item => {
+    if (typeof item === 'string') return item;
+    return item.quantita ? `${item.vasca}: ${item.quantita} hl` : item.vasca;
+  }).join(' + ');
+  const rows = entries.map(e => [
+    e.data, e.ora || '', e.opCode, e.opDesc, e.opGruppo,
+    formatVasche(e.vaschePartenza),
+    formatVasche(e.vascheArrivo),
+    e.vino || '',
+    (() => { const l = LINEE_PRODOTTI.find(x => x.codice === e.vino); return l ? l.descrizione : (e.prodotto || ''); })(),
+    e.annata || '',
+    e.codiceOrigine || '',
+    (e.prodottiMateriali || []).map(p => {
+      if (p.dose && p.totale) return `${p.descrizione}: ${p.dose} ${p.unita} (${p.totale} ${totalUnit(p.unita)})`;
+      if (p.totale) return `${p.descrizione}: ${p.totale} ${p.unita.replace('/hl','')}`;
+      if (p.dose) return `${p.descrizione}: ${p.dose} ${p.unita}`;
+      if (p.quantita) return `${p.descrizione}: ${p.quantita} ${p.unita || ''}`;
+      return p.descrizione;
+    }).join(' + '),
+    e.qta || '', e.operatore || '',
+    (e.note || '').replace(/\n/g,' '), (e.foto || []).length
+  ]);
+  const csv = '\uFEFF' + [headers, ...rows].map(r =>
+    r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(';')
+  ).join('\n');
+  downloadFile(csv, `cantina-log-${todayStr()}.csv`, 'text/csv');
+  toast('📊 CSV scaricato');
+}
+function exportJSON() {
+  const json = JSON.stringify({ exported: new Date().toISOString(), entries }, null, 2);
+  downloadFile(json, `cantina-backup-${todayStr()}.json`, 'application/json');
+  toast('💾 Backup scaricato');
+}
+function importJSON() { document.getElementById('import-file').click(); }
+function handleImport(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.entries || !Array.isArray(data.entries)) throw 0;
+      if (!confirm(`Importare ${data.entries.length} registrazioni?`)) return;
+      entries = [...data.entries, ...entries];
+      persist(); renderList(); toast('✅ Importato');
+    } catch (err) { toast('⚠️ File non valido'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+function clearAll() {
+  if (!confirm('Eliminare TUTTE le registrazioni?')) return;
+  if (!confirm('Sei sicuro? Fai prima un backup!')) return;
+  entries = []; persist(); renderList(); toast('Tutto cancellato');
+}
+function downloadFile(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 100);
+}
+
+// ===== UTILS =====
+function parseHl(s) {
+  if (s === null || s === undefined) return 0;
+  const str = String(s).trim().replace(',', '.');
+  if (!str) return 0;
+  const n = parseFloat(str);
+  return isNaN(n) ? 0 : n;
+}
+function formatHl(n) {
+  if (n === null || n === undefined || isNaN(n)) return '';
+  return Number(n).toFixed(2).replace('.', ',');
+}
+
+function normalizeQta(input) {
+  let val = (input.value || '').trim();
+  if (!val) { input.value = ''; return ''; }
+  val = val.replace('.', ',');
+  const m = val.match(/^(\d+)(?:,(\d*))?$/);
+  if (!m) {
+    toast('⚠️ Quantità: usa solo cifre e virgola (es. 25,00)');
+    return null;
+  }
+  let decPart = m[2] || '';
+  if (decPart.length > 4) {
+    toast('⚠️ Massimo 4 cifre dopo la virgola');
+    return null;
+  }
+  if (decPart.length < 2) decPart = decPart.padEnd(2, '0');
+  const normalized = m[1] + ',' + decPart;
+  input.value = normalized;
+  return normalized;
+}
+
+function formatDate(d) { if (!d) return ''; const [y,m,day] = d.split('-'); return `${day}/${m}/${y.slice(2)}`; }
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s) { return String(s).replace(/'/g, "\\'"); }
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+init();
+</script>
+
+</body>
+</html>
