@@ -2048,7 +2048,7 @@ function renderChips(target) {
     const v = VASCHE.find(x => x.vasca === item.vasca);
     if (!v) return '';
     const warnHtml = target === 'arrivo' ? `<div class="vasca-chip-warn" id="chip-warn-arrivo-${idx}"></div>` : '';
-    const calBtnHtml = target === 'arrivo' ? calibraButtonHtml(v.vasca) : '';
+    const calBtnHtml = calibraButtonHtml(v.vasca, target);
     return `
       <div class="vasca-chip ${cls}">
         <span class="code">${escapeHtml(v.vasca)}</span>
@@ -3587,7 +3587,9 @@ function viewPhoto(src) {
 
 let geometrieByVasca = new Map();
 let calibraModalVasca = null;
+let calibraModalTarget = 'arrivo';
 let completaGeomModalVasca = null;
+let completaGeomModalTarget = 'arrivo';
 
 const GEOM_PARAMS_REQUIRED = {
   CV:  ['diametro', 'altezza'],
@@ -3761,7 +3763,7 @@ async function fetchGeometrieFromSheet() {
     const arr = Array.isArray(data.geometrie) ? data.geometrie : [];
     geometrieByVasca = new Map(arr.map(g => [g.vasca, g]));
     saveGeometrieToCache();
-    if (typeof renderChips === 'function') renderChips('arrivo');
+    if (typeof renderChips === 'function') { renderChips('partenza'); renderChips('arrivo'); }
     return arr.length;
   } catch (err) {
     console.warn('fetchGeometrieFromSheet:', err);
@@ -3789,7 +3791,8 @@ async function updateGeometriaOnServer(vasca, fields) {
   }
 }
 
-function calibraButtonHtml(vasca) {
+function calibraButtonHtml(vasca, target) {
+  target = target || 'arrivo';
   const stato = getStatoGeometria(vasca);
   if (stato === 'na') return '';
   const map = {
@@ -3799,15 +3802,16 @@ function calibraButtonHtml(vasca) {
   };
   const cfg = map[stato] || map.mancante;
   const onclick = stato === 'mancante'
-    ? `openCompletaGeomModal('${escapeAttr(vasca)}')`
-    : `openCalibraModal('${escapeAttr(vasca)}')`;
+    ? `openCompletaGeomModal('${escapeAttr(vasca)}','${target}')`
+    : `openCalibraModal('${escapeAttr(vasca)}','${target}')`;
   return `<button class="calibra-btn ${cfg.cls}" title="${cfg.title}" onclick="event.stopPropagation(); ${onclick}">📏</button>`;
 }
 
-function openCalibraModal(vasca) {
+function openCalibraModal(vasca, target) {
   const geom = getGeometriaEffettiva(vasca);
   if (!geom) { toast('Geometria non disponibile per ' + vasca); return; }
   calibraModalVasca = vasca;
+  calibraModalTarget = target || 'arrivo';
   document.getElementById('calibra-title').textContent = 'Calibra vasca ' + vasca;
   const cap = capacitaMassima(geom);
   const lines = [];
@@ -3858,18 +3862,21 @@ function calibraApplyToChip(which) {
     if (h != null) valHl = volumeFromHeight(geom, h);
   }
   if (valHl == null) { toast('Inserisci un valore valido'); return; }
-  const idx = selectedArrivo.findIndex(a => a.vasca === calibraModalVasca);
-  if (idx < 0) { toast('Vasca non più tra quelle in carico'); closeCalibraModal(); return; }
-  selectedArrivo[idx].quantita = formatHl(valHl);
-  renderChips('arrivo');
+  const target = calibraModalTarget || 'arrivo';
+  const arr = target === 'partenza' ? selectedPartenza : selectedArrivo;
+  const idx = arr.findIndex(a => a.vasca === calibraModalVasca);
+  if (idx < 0) { toast('Vasca non più selezionata'); closeCalibraModal(); return; }
+  arr[idx].quantita = formatHl(valHl);
+  renderChips(target);
   closeCalibraModal();
   toast('✓ Quantità impostata: ' + formatHl(valHl) + ' hl');
 }
 
-function openCompletaGeomModal(vasca) {
+function openCompletaGeomModal(vasca, target) {
   const geom = geometrieByVasca.get(vasca);
   if (!geom) { toast('Vasca senza record geometria: ' + vasca); return; }
   completaGeomModalVasca = vasca;
+  completaGeomModalTarget = target || 'arrivo';
   document.getElementById('completa-geom-title').textContent = 'Completa geometria · ' + vasca;
   document.getElementById('completa-geom-forma').textContent = geom.forma || '—';
   const formaCode = geom.forma_code;
@@ -3921,6 +3928,7 @@ async function saveCompletaGeom() {
   if (ok) {
     toast('✓ Geometria aggiornata');
     closeCompletaGeomModal();
+    renderChips('partenza');
     renderChips('arrivo');
   } else {
     toast('❌ Sync fallito — riprova');
