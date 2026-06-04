@@ -3,7 +3,7 @@
 //
 // Per aggiornare la cache dopo un cambio di codice:
 // incrementa la versione di CACHE_VERSION qui sotto.
-const CACHE_VERSION = 'rc-v5-vino-fix';
+const CACHE_VERSION = 'rc-v6-debug';
 const CACHE_NAME = `registro-cantina-${CACHE_VERSION}`;
 
 const ASSETS_TO_CACHE = [
