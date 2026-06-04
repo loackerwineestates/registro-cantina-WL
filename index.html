@@ -723,6 +723,75 @@
     flex: 1; font-size: 13px; color: #2b1a14;
   }
 
+/* ===== Calibra button + modal ===== */
+.calibra-btn {
+  background: transparent;
+  border: 1px solid rgba(91,26,26,.25);
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-left: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+}
+.calibra-btn.cal-ok   { border-color: #6c8a4f; background: #eaf5d8; }
+.calibra-btn.cal-warn { border-color: #c9a235; background: #fff3cf; }
+.calibra-btn.cal-add  { border-color: #999; background: #f0f0f0; opacity: 0.7; }
+.calibra-btn:active   { transform: scale(0.95); }
+
+.calibra-tabs {
+  display: flex;
+  border-bottom: 1px solid #e8d7c5;
+}
+.calibra-tab {
+  flex: 1;
+  padding: 12px 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b5444;
+  cursor: pointer;
+}
+.calibra-tab.active {
+  color: #5b1a1a;
+  border-bottom-color: #5b1a1a;
+}
+.calibra-pane.hidden { display: none; }
+.calibra-result-box {
+  background: #f6efe5;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  text-align: center;
+}
+.calibra-result-label {
+  font-size: 12px;
+  color: #6b5444;
+  margin-bottom: 4px;
+}
+.calibra-result-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: #5b1a1a;
+}
+#completa-geom-fields .form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+#completa-geom-fields .form-row span {
+  font-size: 12px;
+  color: #6b5444;
+  margin-bottom: 4px;
+}
+#completa-geom-fields .form-row input {
+  padding: 8px;
+  border: 1px solid #d4c3b1;
+  border-radius: 6px;
+  font-size: 14px;
+}
 </style>
 </head>
 <body>
@@ -1088,6 +1157,76 @@
 <!-- CAMPO PICKER -->
 <div class="agg-picker-overlay" id="campo-picker">
   <div class="agg-picker-list" id="campo-picker-list"></div>
+</div>
+
+<!-- CALIBRA MODAL -->
+<div class="modal-overlay" id="calibra-modal">
+  <div class="modal" style="max-width: 460px;">
+    <div class="modal-head">
+      <div style="flex:1;">
+        <h3 id="calibra-title" style="margin:0;">Calibra vasca</h3>
+        <div id="calibra-subtitle" style="font-size:12px; color:#6b5444; margin-top:2px;"></div>
+      </div>
+      <button class="modal-close" onclick="closeCalibraModal()">×</button>
+    </div>
+    <div class="calibra-tabs">
+      <button class="calibra-tab active" data-tab="v2h" onclick="switchCalibraTab('v2h')">Volume → cm</button>
+      <button class="calibra-tab" data-tab="h2v" onclick="switchCalibraTab('h2v')">cm → Volume</button>
+    </div>
+    <div class="modal-body" style="padding:16px;">
+      <div id="calibra-pane-v2h" class="calibra-pane">
+        <label class="form-row">
+          <span>Voglio caricare</span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <input type="text" id="calibra-input-v" inputmode="decimal" placeholder="0,00" oninput="calibraOnVolumeChange(this.value)" style="flex:1;">
+            <span style="color:#6b5444;">hl</span>
+          </div>
+        </label>
+        <div class="calibra-result-box">
+          <div class="calibra-result-label">Livello atteso</div>
+          <div class="calibra-result-value" id="calibra-result-h">—</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="calibraApplyToChip('v2h')">Usa questo valore</button>
+      </div>
+      <div id="calibra-pane-h2v" class="calibra-pane hidden">
+        <label class="form-row">
+          <span>Altezza misurata</span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <input type="text" id="calibra-input-h" inputmode="decimal" placeholder="0" oninput="calibraOnHeightChange(this.value)" style="flex:1;">
+            <span style="color:#6b5444;">cm</span>
+          </div>
+        </label>
+        <div class="calibra-result-box">
+          <div class="calibra-result-label">Volume reale</div>
+          <div class="calibra-result-value" id="calibra-result-v">—</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="calibraApplyToChip('h2v')">Usa questo valore</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLETA GEOMETRIA MODAL -->
+<div class="modal-overlay" id="completa-geom-modal">
+  <div class="modal" style="max-width: 460px;">
+    <div class="modal-head">
+      <div style="flex:1;">
+        <h3 id="completa-geom-title" style="margin:0;">Completa geometria</h3>
+        <div id="completa-geom-forma" style="font-size:12px; color:#6b5444; margin-top:2px;"></div>
+      </div>
+      <button class="modal-close" onclick="closeCompletaGeomModal()">×</button>
+    </div>
+    <div class="modal-body" style="padding:16px;">
+      <div style="font-size:13px; color:#6b5444; margin-bottom:10px;">
+        Inserisci le dimensioni mancanti. I valori vengono salvati sul Google Sheet e usati per il calcolo di volume/altezza.
+      </div>
+      <div id="completa-geom-fields"></div>
+    </div>
+    <div class="modal-foot" style="display:flex; gap:8px;">
+      <button class="btn" onclick="closeCompletaGeomModal()" style="flex:1;">Annulla</button>
+      <button class="btn btn-primary" id="completa-geom-save-btn" onclick="saveCompletaGeom()" style="flex:2;">Salva</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1651,6 +1790,9 @@ function init() {
   renderList();
   renderStatoFilters();
   updateLastFetchLabel();
+  // Geometrie vasche: prima dalla cache locale, poi sync in background col Sheet
+  loadGeometrieFromCache();
+  fetchGeometrieFromSheet();
   // Registrazione service worker per uso offline
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -1906,6 +2048,7 @@ function renderChips(target) {
     const v = VASCHE.find(x => x.vasca === item.vasca);
     if (!v) return '';
     const warnHtml = target === 'arrivo' ? `<div class="vasca-chip-warn" id="chip-warn-arrivo-${idx}"></div>` : '';
+    const calBtnHtml = target === 'arrivo' ? calibraButtonHtml(v.vasca) : '';
     return `
       <div class="vasca-chip ${cls}">
         <span class="code">${escapeHtml(v.vasca)}</span>
@@ -1917,6 +2060,7 @@ function renderChips(target) {
                  oninput="updateChipQta('${target}', ${idx}, this.value)"
                  onblur="normalizeChipQta('${target}', ${idx}, this)">
           <span class="unit">hl</span>
+          ${calBtnHtml}
         </div>
         <button class="x" onclick="removeChip('${target}','${escapeAttr(item.vasca)}')">×</button>
         ${warnHtml}
@@ -2373,6 +2517,9 @@ async function fetchFromSheet() {
     persist();
     renderList();
     if (typeof renderStato === 'function') renderStato();
+
+    // Sync anche le geometrie (best-effort, non blocca il toast)
+    fetchGeometrieFromSheet();
 
     const now = new Date();
     localStorage.setItem('cantina-last-fetch', now.toISOString());
@@ -3392,120 +3539,12 @@ function showEditBanner(entry) {
   banner.innerHTML = `<span>✏️ <strong>Stai modificando</strong> ${entry.opCode} del ${formatDate(entry.data)}${entry.sent ? ' (gia sincronizzata, verra ri-inviata)' : ''}</span><button onclick="cancelEditEntry()" style="background:none;border:1px solid #b07020;color:#7a5a00;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;">Annulla</button>`;
 }
 
-function hideEditBanner() {
-  const banner = document.getElementById('edit-banner');
-  if (banner) banner.remove();
-}
-
 function cancelEditEntry() {
   editingEntryId = null;
-  hideEditBanner();
-  if (typeof resetForm === 'function') resetForm();
+  const banner = document.getElementById('edit-banner');
+  if (banner) banner.remove();
+  resetForm();
   toast('Modifica annullata');
-}
-
-function viewPhoto(src) {
-  const w = window.open('', '_blank');
-  w.document.write(`<body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;"><img src="${src}" style="max-width:100%;max-height:100%;"></body>`);
-}
-
-// ===== EXPORT =====
-function exportCSV() {
-  if (entries.length === 0) { toast('Niente da esportare'); return; }
-  const headers = ['Data','Ora','Cod. Op','Operazione','Gruppo','Vasche da scaricare','Vasche da caricare','Vino (codice)','Linea prodotto','Annata','Codice origine','Prodotti e materiali','Quantità totale (hl)','Operatore','Note','Num. foto'];
-  const formatVasche = (arr) => (arr || []).map(item => {
-    if (typeof item === 'string') return item;
-    return item.quantita ? `${item.vasca}: ${item.quantita} hl` : item.vasca;
-  }).join(' + ');
-  const rows = entries.map(e => [
-    e.data, e.ora || '', e.opCode, e.opDesc, e.opGruppo,
-    formatVasche(e.vaschePartenza),
-    formatVasche(e.vascheArrivo),
-    e.vino || '',
-    (() => { const l = LINEE_PRODOTTI.find(x => x.codice === e.vino); return l ? l.descrizione : (e.prodotto || ''); })(),
-    e.annata || '',
-    e.codiceOrigine || '',
-    (e.prodottiMateriali || []).map(p => {
-      if (p.dose && p.totale) return `${p.descrizione}: ${p.dose} ${p.unita} (${p.totale} ${totalUnit(p.unita)})`;
-      if (p.totale) return `${p.descrizione}: ${p.totale} ${p.unita.replace('/hl','')}`;
-      if (p.dose) return `${p.descrizione}: ${p.dose} ${p.unita}`;
-      if (p.quantita) return `${p.descrizione}: ${p.quantita} ${p.unita || ''}`;
-      return p.descrizione;
-    }).join(' + '),
-    e.qta || '', e.operatore || '',
-    (e.note || '').replace(/\n/g,' '), (e.foto || []).length
-  ]);
-  const csv = '\uFEFF' + [headers, ...rows].map(r =>
-    r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(';')
-  ).join('\n');
-  downloadFile(csv, `cantina-log-${todayStr()}.csv`, 'text/csv');
-  toast('📊 CSV scaricato');
-}
-function exportJSON() {
-  const json = JSON.stringify({ exported: new Date().toISOString(), entries }, null, 2);
-  downloadFile(json, `cantina-backup-${todayStr()}.json`, 'application/json');
-  toast('💾 Backup scaricato');
-}
-function importJSON() { document.getElementById('import-file').click(); }
-function handleImport(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const data = JSON.parse(ev.target.result);
-      if (!data.entries || !Array.isArray(data.entries)) throw 0;
-      if (!confirm(`Importare ${data.entries.length} registrazioni?`)) return;
-      entries = [...data.entries, ...entries];
-      persist(); renderList(); toast('✅ Importato');
-    } catch (err) { toast('⚠️ File non valido'); }
-  };
-  reader.readAsText(file);
-  e.target.value = '';
-}
-function clearAll() {
-  if (!confirm('Eliminare TUTTE le registrazioni?')) return;
-  if (!confirm('Sei sicuro? Fai prima un backup!')) return;
-  entries = []; persist(); renderList(); toast('Tutto cancellato');
-}
-function downloadFile(content, filename, mime) {
-  const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 100);
-}
-
-// ===== UTILS =====
-function parseHl(s) {
-  if (s === null || s === undefined) return 0;
-  const str = String(s).trim().replace(',', '.');
-  if (!str) return 0;
-  const n = parseFloat(str);
-  return isNaN(n) ? 0 : n;
-}
-function formatHl(n) {
-  if (n === null || n === undefined || isNaN(n)) return '';
-  return Number(n).toFixed(2).replace('.', ',');
-}
-
-function normalizeQta(input) {
-  let val = (input.value || '').trim();
-  if (!val) { input.value = ''; return ''; }
-  val = val.replace('.', ',');
-  const m = val.match(/^(\d+)(?:,(\d*))?$/);
-  if (!m) {
-    toast('⚠️ Quantità: usa solo cifre e virgola (es. 25,00)');
-    return null;
-  }
-  let decPart = m[2] || '';
-  if (decPart.length > 4) {
-    toast('⚠️ Massimo 4 cifre dopo la virgola');
-    return null;
-  }
-  if (decPart.length < 2) decPart = decPart.padEnd(2, '0');
-  const normalized = m[1] + ',' + decPart;
-  input.value = normalized;
-  return normalized;
 }
 
 function formatDate(d) { if (!d) return ''; const [y,m,day] = d.split('-'); return `${day}/${m}/${y.slice(2)}`; }
@@ -3516,6 +3555,352 @@ function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ============================================================================
+// === GEOMETRIE VASCHE — motore di calcolo + sync Sheet + UI calibrazione ====
+// ============================================================================
+
+let geometrieByVasca = new Map();
+let calibraModalVasca = null;
+let completaGeomModalVasca = null;
+
+const GEOM_PARAMS_REQUIRED = {
+  CV:  ['diametro', 'altezza'],
+  CVS: ['diametro', 'altezza'],
+  PRV: ['lunghezza', 'larghezza', 'altezza'],
+  CO:  ['diametro', 'L_interna'],
+  TCV: ['diametro', 'diametro_alto', 'altezza'],
+  CEB: ['L_interna', 'H_pancia', 'W_pancia', 'H_fondo', 'W_fondo']
+};
+function _geomNum(v) {
+  if (v === '' || v == null) return null;
+  const n = parseFloat(String(v).replace(',', '.'));
+  return isNaN(n) ? null : n;
+}
+function _vfondoHl(g) { const l = _geomNum(g.v_fondo_litri); return l == null ? 0 : l/100; }
+function _vcieloHl(g) { const l = _geomNum(g.v_cielo_litri); return l == null ? 0 : l/100; }
+function _lengthCO(g) { return _geomNum(g.L_interna) != null ? _geomNum(g.L_interna) : _geomNum(g.lunghezza); }
+
+function isGeometriaCompleta(geom) {
+  if (!geom || !geom.forma_code) return false;
+  if (geom.forma_code === 'CO') return _geomNum(geom.diametro) != null && _lengthCO(geom) != null;
+  const req = GEOM_PARAMS_REQUIRED[geom.forma_code];
+  if (!req) return false;
+  return req.every(k => _geomNum(geom[k]) != null);
+}
+function canInferAltezza(geom, vascaInfo) {
+  if (!geom || !vascaInfo) return false;
+  const cap = _geomNum(vascaInfo.capacita);
+  if (cap == null || cap <= 0) return false;
+  const c = geom.forma_code;
+  if (c === 'CV' || c === 'CVS') return _geomNum(geom.diametro) != null && _geomNum(geom.altezza) == null;
+  if (c === 'PRV') return _geomNum(geom.lunghezza) != null && _geomNum(geom.larghezza) != null && _geomNum(geom.altezza) == null;
+  return false;
+}
+function inferAltezza(geom, vascaInfo) {
+  const out = Object.assign({}, geom);
+  const cap = _geomNum(vascaInfo && vascaInfo.capacita);
+  if (cap == null || cap <= 0) return out;
+  const vCorpo = cap - _vfondoHl(out) - _vcieloHl(out);
+  if (vCorpo <= 0) return out;
+  const c = out.forma_code;
+  if (c === 'CV' || c === 'CVS') {
+    const d = _geomNum(out.diametro); if (d == null) return out;
+    const r = d / 2;
+    out.altezza = +(vCorpo * 100000 / (Math.PI * r * r)).toFixed(2);
+    out._altezza_stimata = true;
+  } else if (c === 'PRV') {
+    const L = _geomNum(out.lunghezza), W = _geomNum(out.larghezza);
+    if (L == null || W == null) return out;
+    out.altezza = +(vCorpo * 100000 / (L * W)).toFixed(2);
+    out._altezza_stimata = true;
+  }
+  return out;
+}
+function volumeFromHeight(geom, h_cm) {
+  if (!isGeometriaCompleta(geom) || h_cm == null) return null;
+  const h = Math.max(0, _geomNum(h_cm));
+  switch (geom.forma_code) {
+    case 'CV': case 'CVS': {
+      const d = _geomNum(geom.diametro), H = _geomNum(geom.altezza);
+      const hUsable = Math.min(h, H);
+      const r = d / 2;
+      return _vfondoHl(geom) + (Math.PI * r * r * hUsable / 100000);
+    }
+    case 'PRV': {
+      const L = _geomNum(geom.lunghezza), W = _geomNum(geom.larghezza), H = _geomNum(geom.altezza);
+      const hUsable = Math.min(h, H);
+      return _vfondoHl(geom) + (L * W * hUsable / 100000);
+    }
+    case 'CO': {
+      const d = _geomNum(geom.diametro), L = _lengthCO(geom);
+      const r = d / 2;
+      const hUsable = Math.min(Math.max(h, 0), d);
+      const ratio = Math.min(1, Math.max(-1, (r - hUsable) / r));
+      const A = r*r*Math.acos(ratio) - (r - hUsable) * Math.sqrt(Math.max(0, 2*r*hUsable - hUsable*hUsable));
+      return (A * L) / 100000;
+    }
+    case 'TCV': {
+      const Rb = _geomNum(geom.diametro)/2, Ra = _geomNum(geom.diametro_alto)/2, H = _geomNum(geom.altezza);
+      const hUsable = Math.min(h, H);
+      const r_h = Rb - (Rb - Ra) * (hUsable / H);
+      return (Math.PI * hUsable / 3) * (Rb*Rb + r_h*r_h + Rb*r_h) / 100000;
+    }
+    default: return null;
+  }
+}
+function heightFromVolume(geom, v_hl) {
+  if (!isGeometriaCompleta(geom) || v_hl == null) return null;
+  const v = _geomNum(v_hl);
+  if (v == null || v < 0) return null;
+  switch (geom.forma_code) {
+    case 'CV': case 'CVS': {
+      const vCorpo = v - _vfondoHl(geom);
+      if (vCorpo <= 0) return 0;
+      const r = _geomNum(geom.diametro) / 2;
+      const h = vCorpo * 100000 / (Math.PI * r * r);
+      return Math.min(h, _geomNum(geom.altezza));
+    }
+    case 'PRV': {
+      const vCorpo = v - _vfondoHl(geom);
+      if (vCorpo <= 0) return 0;
+      const L = _geomNum(geom.lunghezza), W = _geomNum(geom.larghezza);
+      const h = vCorpo * 100000 / (L * W);
+      return Math.min(h, _geomNum(geom.altezza));
+    }
+    case 'CO':  return _geomBsearch(geom, v, 0, _geomNum(geom.diametro));
+    case 'TCV': return _geomBsearch(geom, v, 0, _geomNum(geom.altezza));
+    default: return null;
+  }
+}
+function _geomBsearch(geom, vTarget, hMin, hMax) {
+  const vMax = volumeFromHeight(geom, hMax);
+  if (vTarget >= vMax) return hMax;
+  if (vTarget <= 0) return 0;
+  let lo = hMin, hi = hMax;
+  for (let i = 0; i < 50; i++) {
+    const mid = (lo + hi) / 2;
+    if (volumeFromHeight(geom, mid) < vTarget) lo = mid; else hi = mid;
+    if (hi - lo < 0.01) break;
+  }
+  return (lo + hi) / 2;
+}
+function capacitaMassima(geom) {
+  if (!isGeometriaCompleta(geom)) return null;
+  switch (geom.forma_code) {
+    case 'CV': case 'CVS': case 'PRV': case 'TCV':
+      return volumeFromHeight(geom, _geomNum(geom.altezza)) + _vcieloHl(geom);
+    case 'CO': return volumeFromHeight(geom, _geomNum(geom.diametro));
+    default: return null;
+  }
+}
+function getStatoGeometria(vasca) {
+  const geom = geometrieByVasca.get(vasca);
+  if (!geom || !geom.forma_code) return 'na';
+  if (geom.forma_code === 'CEB' && !isGeometriaCompleta(geom)) return 'mancante';
+  if (isGeometriaCompleta(geom)) return 'completa';
+  const vascaInfo = VASCHE.find(v => v.vasca === vasca);
+  if (canInferAltezza(geom, vascaInfo)) return 'parziale';
+  return 'mancante';
+}
+function getGeometriaEffettiva(vasca) {
+  const geom = geometrieByVasca.get(vasca);
+  if (!geom) return null;
+  if (isGeometriaCompleta(geom)) return geom;
+  const vascaInfo = VASCHE.find(v => v.vasca === vasca);
+  if (canInferAltezza(geom, vascaInfo)) return inferAltezza(geom, vascaInfo);
+  return geom;
+}
+
+const GEOM_CACHE_KEY = 'cantina-geometrie-WL';
+function loadGeometrieFromCache() {
+  try {
+    const raw = localStorage.getItem(GEOM_CACHE_KEY);
+    if (!raw) return;
+    const arr = JSON.parse(raw);
+    geometrieByVasca = new Map(arr.map(g => [g.vasca, g]));
+  } catch (e) { console.warn('Cache geometrie:', e); }
+}
+function saveGeometrieToCache() {
+  try {
+    const arr = Array.from(geometrieByVasca.values());
+    localStorage.setItem(GEOM_CACHE_KEY, JSON.stringify(arr));
+  } catch (e) { console.warn('Save geometrie:', e); }
+}
+async function fetchGeometrieFromSheet() {
+  try {
+    const res = await fetch(REGISTRO_API_URL + '?action=geometrie', { method: 'GET' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'errore lato server');
+    const arr = Array.isArray(data.geometrie) ? data.geometrie : [];
+    geometrieByVasca = new Map(arr.map(g => [g.vasca, g]));
+    saveGeometrieToCache();
+    if (typeof renderChips === 'function') renderChips('arrivo');
+    return arr.length;
+  } catch (err) {
+    console.warn('fetchGeometrieFromSheet:', err);
+    return null;
+  }
+}
+async function updateGeometriaOnServer(vasca, fields) {
+  const payload = { action: 'updateGeometria', vasca: vasca, fields: fields };
+  try {
+    const res = await fetch(REGISTRO_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'errore lato server');
+    const existing = geometrieByVasca.get(vasca) || { vasca: vasca };
+    const merged = Object.assign({}, existing, fields, { vasca: vasca });
+    geometrieByVasca.set(vasca, merged);
+    saveGeometrieToCache();
+    return true;
+  } catch (err) {
+    console.error('updateGeometriaOnServer:', err);
+    return false;
+  }
+}
+
+function calibraButtonHtml(vasca) {
+  const stato = getStatoGeometria(vasca);
+  if (stato === 'na') return '';
+  const map = {
+    completa: { cls: 'cal-ok',   title: 'Calibra: calcola altezza/volume' },
+    parziale: { cls: 'cal-warn', title: 'Calibra: calcolo basato su altezza stimata' },
+    mancante: { cls: 'cal-add',  title: 'Aggiungi dati di taratura per questa vasca' }
+  };
+  const cfg = map[stato] || map.mancante;
+  const onclick = stato === 'mancante'
+    ? `openCompletaGeomModal('${escapeAttr(vasca)}')`
+    : `openCalibraModal('${escapeAttr(vasca)}')`;
+  return `<button class="calibra-btn ${cfg.cls}" title="${cfg.title}" onclick="event.stopPropagation(); ${onclick}">📏</button>`;
+}
+
+function openCalibraModal(vasca) {
+  const geom = getGeometriaEffettiva(vasca);
+  if (!geom) { toast('Geometria non disponibile per ' + vasca); return; }
+  calibraModalVasca = vasca;
+  document.getElementById('calibra-title').textContent = 'Calibra vasca ' + vasca;
+  const cap = capacitaMassima(geom);
+  const lines = [];
+  lines.push(geom.forma || '');
+  if (cap != null) lines.push('Capacità: ' + cap.toFixed(2).replace('.', ',') + ' hl');
+  if (geom._altezza_stimata) lines.push('⚠ altezza stimata da capacità');
+  document.getElementById('calibra-subtitle').textContent = lines.filter(Boolean).join(' · ');
+  switchCalibraTab('v2h');
+  document.getElementById('calibra-input-v').value = '';
+  document.getElementById('calibra-input-h').value = '';
+  document.getElementById('calibra-result-h').textContent = '—';
+  document.getElementById('calibra-result-v').textContent = '—';
+  document.getElementById('calibra-modal').classList.add('show');
+}
+function closeCalibraModal() {
+  document.getElementById('calibra-modal').classList.remove('show');
+  calibraModalVasca = null;
+}
+function switchCalibraTab(tab) {
+  document.querySelectorAll('.calibra-tab').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
+  document.getElementById('calibra-pane-v2h').classList.toggle('hidden', tab !== 'v2h');
+  document.getElementById('calibra-pane-h2v').classList.toggle('hidden', tab !== 'h2v');
+}
+function calibraOnVolumeChange(val) {
+  if (!calibraModalVasca) return;
+  const geom = getGeometriaEffettiva(calibraModalVasca);
+  const v = _geomNum(val);
+  if (v == null) { document.getElementById('calibra-result-h').textContent = '—'; return; }
+  const h = heightFromVolume(geom, v);
+  document.getElementById('calibra-result-h').textContent = h == null ? '—' : (h.toFixed(1).replace('.', ',') + ' cm');
+}
+function calibraOnHeightChange(val) {
+  if (!calibraModalVasca) return;
+  const geom = getGeometriaEffettiva(calibraModalVasca);
+  const h = _geomNum(val);
+  if (h == null) { document.getElementById('calibra-result-v').textContent = '—'; return; }
+  const v = volumeFromHeight(geom, h);
+  document.getElementById('calibra-result-v').textContent = v == null ? '—' : (v.toFixed(2).replace('.', ',') + ' hl');
+}
+function calibraApplyToChip(which) {
+  if (!calibraModalVasca) return;
+  let valHl = null;
+  if (which === 'v2h') {
+    valHl = _geomNum(document.getElementById('calibra-input-v').value);
+  } else {
+    const geom = getGeometriaEffettiva(calibraModalVasca);
+    const h = _geomNum(document.getElementById('calibra-input-h').value);
+    if (h != null) valHl = volumeFromHeight(geom, h);
+  }
+  if (valHl == null) { toast('Inserisci un valore valido'); return; }
+  const idx = selectedArrivo.findIndex(a => a.vasca === calibraModalVasca);
+  if (idx < 0) { toast('Vasca non più tra quelle in carico'); closeCalibraModal(); return; }
+  selectedArrivo[idx].quantita = formatHl(valHl);
+  renderChips('arrivo');
+  closeCalibraModal();
+  toast('✓ Quantità impostata: ' + formatHl(valHl) + ' hl');
+}
+
+function openCompletaGeomModal(vasca) {
+  const geom = geometrieByVasca.get(vasca);
+  if (!geom) { toast('Vasca senza record geometria: ' + vasca); return; }
+  completaGeomModalVasca = vasca;
+  document.getElementById('completa-geom-title').textContent = 'Completa geometria · ' + vasca;
+  document.getElementById('completa-geom-forma').textContent = geom.forma || '—';
+  const formaCode = geom.forma_code;
+  const params = GEOM_PARAMS_REQUIRED[formaCode] || [];
+  const labels = {
+    diametro: 'Diametro (cm)',
+    diametro_alto: 'Diametro alto piccolo (cm)',
+    lunghezza: 'Lunghezza (cm)',
+    larghezza: 'Larghezza (cm)',
+    altezza: 'Altezza max corpo (cm)',
+    L_interna: 'Lunghezza interna L (cm)',
+    H_pancia: 'H pancia centrale (cm)',
+    W_pancia: 'W pancia centrale (cm)',
+    H_fondo: 'H fondo (cm)',
+    W_fondo: 'W fondo (cm)'
+  };
+  const html = params.map(k => {
+    const val = geom[k] != null ? geom[k] : '';
+    const missing = (val === '' || val == null);
+    return `<label class="form-row">
+      <span>${labels[k] || k}${missing ? ' <em style="color:#b03a2e">mancante</em>' : ''}</span>
+      <input type="text" inputmode="decimal" data-key="${k}" value="${escapeAttr(val)}" placeholder="cm">
+    </label>`;
+  }).join('');
+  document.getElementById('completa-geom-fields').innerHTML = html;
+  document.getElementById('completa-geom-modal').classList.add('show');
+}
+function closeCompletaGeomModal() {
+  document.getElementById('completa-geom-modal').classList.remove('show');
+  completaGeomModalVasca = null;
+}
+async function saveCompletaGeom() {
+  if (!completaGeomModalVasca) return;
+  const fields = {};
+  document.querySelectorAll('#completa-geom-fields input[data-key]').forEach(inp => {
+    const k = inp.dataset.key;
+    const v = (inp.value || '').trim().replace(',', '.');
+    if (v !== '') {
+      const n = parseFloat(v);
+      if (!isNaN(n)) fields[k] = n;
+    }
+  });
+  if (Object.keys(fields).length === 0) { toast('Nessun valore inserito'); return; }
+  fields.data_taratura = new Date().toISOString().split('T')[0];
+  const btn = document.getElementById('completa-geom-save-btn');
+  btn.disabled = true; btn.textContent = 'Salvataggio…';
+  const ok = await updateGeometriaOnServer(completaGeomModalVasca, fields);
+  btn.disabled = false; btn.textContent = 'Salva';
+  if (ok) {
+    toast('✓ Geometria aggiornata');
+    closeCompletaGeomModal();
+    renderChips('arrivo');
+  } else {
+    toast('❌ Sync fallito — riprova');
+  }
 }
 
 init();
