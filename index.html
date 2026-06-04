@@ -798,7 +798,7 @@
 
 <header>
   <h1>🍷 Registro Cantina WL</h1>
-  <div class="subtitle">Weingut Loacker · <span id="geom-indicator" style="font-size:11px; cursor:pointer; text-decoration:underline;" onclick="fetchGeometrieFromSheet().then(n=>{ if(n===null) toast('❌ Sync fallito - guarda la console'); else toast('📏 '+n+' geometrie caricate'); })">📏 sync…</span></div>
+  <div class="subtitle">Weingut Loacker · <span onclick="showDiagnostica()" style="cursor:pointer; margin-right:8px; font-size:11px; text-decoration:underline;">🔍 debug</span><span id="geom-indicator" style="font-size:11px; cursor:pointer; text-decoration:underline;" onclick="fetchGeometrieFromSheet().then(n=>{ if(n===null) toast('❌ Sync fallito - guarda la console'); else toast('📏 '+n+' geometrie caricate'); })">📏 sync…</span></div>
 </header>
 
 <div class="tabs">
@@ -1231,6 +1231,37 @@
 
 <div class="toast" id="toast"></div>
 
+<script>
+// === EARLY ERROR HANDLER — cattura errori JS visibili a schermo ===
+window.__jsErrors = [];
+window.addEventListener('error', function(ev) {
+  const msg = (ev.error && ev.error.message) || ev.message || 'unknown';
+  const src = (ev.filename || '').split('/').pop() + ':' + (ev.lineno || '?');
+  window.__jsErrors.push({ msg, src });
+  try {
+    const ind = document.getElementById('geom-indicator');
+    if (ind) { ind.textContent = '⚠ JS ERR: ' + msg.substring(0,40); ind.style.color='#b03a2e'; }
+  } catch(e){}
+  console.error('Captured JS error:', ev);
+});
+function showDiagnostica() {
+  const msgs = [];
+  msgs.push('📊 DIAGNOSTICA');
+  try { msgs.push('LINEE_PRODOTTI: ' + (typeof LINEE_PRODOTTI === 'undefined' ? 'UNDEFINED' : LINEE_PRODOTTI.length + ' elementi')); } catch(e){ msgs.push('LINEE_PRODOTTI: '+e); }
+  try { msgs.push('VASCHE: ' + (typeof VASCHE === 'undefined' ? 'UNDEFINED' : VASCHE.length + ' elementi')); } catch(e){ msgs.push('VASCHE: '+e); }
+  try { msgs.push('OPERAZIONI: ' + (typeof OPERAZIONI === 'undefined' ? 'UNDEFINED' : OPERAZIONI.length + ' elementi')); } catch(e){ msgs.push('OPERAZIONI: '+e); }
+  const fv = document.getElementById('f-vino');
+  const fa = document.getElementById('f-annata');
+  msgs.push('select f-vino: ' + (fv ? fv.options.length + ' opzioni' : 'NULL'));
+  msgs.push('select f-annata: ' + (fa ? fa.options.length + ' opzioni' : 'NULL'));
+  msgs.push('geometrieByVasca: ' + (typeof geometrieByVasca === 'undefined' ? 'UNDEFINED' : geometrieByVasca.size + ' entries'));
+  msgs.push('Errori JS catturati: ' + window.__jsErrors.length);
+  if (window.__jsErrors.length) {
+    window.__jsErrors.forEach((e,i) => msgs.push('  ['+(i+1)+'] '+e.msg+' @ '+e.src));
+  }
+  alert(msgs.join('\n'));
+}
+</script>
 <script>
 // ===== DATA (embedded from Excel files) =====
 // === CANTINA-DATA:WL:META:START === (modificare per ogni cantina)
