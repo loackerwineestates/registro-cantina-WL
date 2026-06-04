@@ -3,7 +3,7 @@
 //
 // Per aggiornare la cache dopo un cambio di codice:
 // incrementa la versione di CACHE_VERSION qui sotto.
-const CACHE_VERSION = 'rc-v1';
+const CACHE_VERSION = 'rc-v2-geom';
 const CACHE_NAME = `registro-cantina-${CACHE_VERSION}`;
 
 const ASSETS_TO_CACHE = [
