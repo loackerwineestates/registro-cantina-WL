@@ -798,7 +798,7 @@
 
 <header>
   <h1>🍷 Registro Cantina WL</h1>
-  <div class="subtitle">Weingut Loacker</div>
+  <div class="subtitle">Weingut Loacker · <span id="geom-indicator" style="font-size:11px;">📏 sync…</span></div>
 </header>
 
 <div class="tabs">
@@ -3764,9 +3764,17 @@ async function fetchGeometrieFromSheet() {
     geometrieByVasca = new Map(arr.map(g => [g.vasca, g]));
     saveGeometrieToCache();
     if (typeof renderChips === 'function') { renderChips('partenza'); renderChips('arrivo'); }
+    // Banner diagnostico: aggiorno indicatore
+    const ind = document.getElementById('geom-indicator');
+    if (ind) {
+      ind.textContent = '📏 ' + arr.length + ' geometrie';
+      ind.style.color = arr.length > 0 ? '#5b7c3a' : '#b03a2e';
+    }
     return arr.length;
   } catch (err) {
     console.warn('fetchGeometrieFromSheet:', err);
+    const ind = document.getElementById('geom-indicator');
+    if (ind) { ind.textContent = '📏 errore sync'; ind.style.color = '#b03a2e'; }
     return null;
   }
 }
