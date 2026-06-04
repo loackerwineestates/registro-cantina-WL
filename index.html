@@ -3985,6 +3985,120 @@ async function saveCompletaGeom() {
   }
 }
 
+
+// ============================================================================
+// === FUNZIONI PERSE NEL TRONCAMENTO — Export/Import/ClearAll ================
+// ============================================================================
+
+function handleImport(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      const incoming = Array.isArray(data) ? data : (data.entries || data.registrazioni || []);
+      if (!Array.isArray(incoming) || incoming.length === 0) {
+        toast('⚠️ Nessuna registrazione nel file');
+        return;
+      }
+      if (!confirm('Importare ' + incoming.length + ' registrazioni? Le tue attuali verranno UNITE (no perdite).')) return;
+      const byId = new Map();
+      entries.forEach(e => { if (e && e.id != null) byId.set(String(e.id), e); });
+      let added = 0, updated = 0;
+      incoming.forEach(r => {
+        if (!r || r.id == null) return;
+        const k = String(r.id);
+        if (byId.has(k)) {
+          const idx = entries.findIndex(e => String(e.id) === k);
+          if (idx >= 0) { entries[idx] = { ...entries[idx], ...r }; updated++; }
+        } else {
+          entries.push(r); added++;
+        }
+      });
+      persist();
+      renderList();
+      if (typeof renderStato === 'function') renderStato();
+      toast('✅ Importate ' + added + ' nuove, ' + updated + ' aggiornate');
+    } catch (err) {
+      console.error('handleImport', err);
+      toast('❌ File non valido: ' + (err.message || err));
+    }
+    // Reset input per permettere ri-import dello stesso file
+    event.target.value = '';
+  };
+  reader.onerror = function() { toast('❌ Lettura file fallita'); };
+  reader.readAsText(file);
+}
+
+function importJSON() {
+  const inp = document.getElementById('import-file');
+  if (inp) inp.click();
+  else toast('Input file non trovato');
+}
+
+function exportJSON() {
+  try {
+    const data = { exportedAt: new Date().toISOString(), cantina: 'WL', entries: entries };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'registro-cantina-WL-backup-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    toast('✅ Backup salvato (' + entries.length + ' registrazioni)');
+  } catch (err) { toast('❌ Export fallito: ' + (err.message || err)); }
+}
+
+function exportCSV() {
+  try {
+    if (entries.length === 0) { toast('Nessuna registrazione da esportare'); return; }
+    const cols = ['id','data','ora','codiceOperazione','operazione','gruppo','vaschePartenza','vascheArrivo','statoLavorazione','quantitaTotaleHl','vino','annata','codiceOrigine','operatore','note'];
+    const fmtV = arr => (arr || []).map(v => typeof v === 'string' ? v : (v.vasca + (v.quantita ? ':' + v.quantita : ''))).join(' + ');
+    const esc = s => {
+      const x = String(s == null ? '' : s);
+      return /[",;\n]/.test(x) ? '"' + x.replace(/"/g,'""') + '"' : x;
+    };
+    const totalHl = e => {
+      const s = (e.vaschePartenza || []).reduce((a,v) => a + parseHl(typeof v === 'string' ? '' : v.quantita), 0);
+      if (s > 0) return s;
+      return (e.vascheArrivo || []).reduce((a,v) => a + parseHl(typeof v === 'string' ? '' : v.quantita), 0);
+    };
+    const lines = [cols.join(';')];
+    entries.forEach(e => {
+      lines.push(cols.map(c => {
+        if (c === 'vaschePartenza') return esc(fmtV(e.vaschePartenza));
+        if (c === 'vascheArrivo') return esc(fmtV(e.vascheArrivo));
+        if (c === 'quantitaTotaleHl') return esc(totalHl(e));
+        if (c === 'codiceOperazione') return esc(e.opCode || '');
+        return esc(e[c]);
+      }).join(';'));
+    });
+    const csv = lines.join('\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'registro-cantina-WL-' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    toast('✅ CSV esportato (' + entries.length + ' registrazioni)');
+  } catch (err) { toast('❌ CSV fallito: ' + (err.message || err)); }
+}
+
+function clearAll() {
+  if (!confirm('⚠️ Cancellare TUTTE le ' + entries.length + ' registrazioni locali?\n\n(Quelle già inviate al Google Sheet restano lì, ma scariche.)')) return;
+  if (!confirm('⚠️ Sei sicuro? Questa azione NON è annullabile.')) return;
+  entries = [];
+  persist();
+  renderList();
+  if (typeof renderStato === 'function') renderStato();
+  toast('🗑️ Tutte le registrazioni locali cancellate');
+}
+
 init();
 </script>
 
