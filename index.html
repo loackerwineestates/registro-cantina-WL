@@ -1655,29 +1655,36 @@ function removeProdotto(i) {
 // ===== INIT =====
 function populateVinoSelect() {
   const sel = document.getElementById('f-vino');
-  if (sel.options.length <= 1) {
-    LINEE_PRODOTTI.forEach(l => {
-      const o = document.createElement('option');
-      o.value = l.codice;
-      o.textContent = `${l.codice} — ${l.descrizione}`;
-      sel.appendChild(o);
-    });
-  }
+  if (!sel) { console.warn('populateVinoSelect: select f-vino non trovata'); return; }
+  const prevValue = sel.value;
+  // Rebuild sempre — robusto contro stato indeterminato
+  sel.innerHTML = '<option value="">— Nessuno —</option>';
+  LINEE_PRODOTTI.forEach(l => {
+    const o = document.createElement('option');
+    o.value = l.codice;
+    o.textContent = l.codice + ' — ' + l.descrizione;
+    sel.appendChild(o);
+  });
+  if (prevValue) sel.value = prevValue;
+  console.log('populateVinoSelect: aggiunte', LINEE_PRODOTTI.length, 'opzioni');
 }
 
 function populateAnnataSelect() {
   const sel = document.getElementById('f-annata');
-  if (sel.options.length <= 1) {
-    const now = new Date();
-    const latest = now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear() - 1;
-    for (let i = 0; i < 10; i++) {
-      const y = latest - i;
-      const o = document.createElement('option');
-      o.value = String(y);
-      o.textContent = String(y);
-      sel.appendChild(o);
-    }
+  if (!sel) { console.warn('populateAnnataSelect: select f-annata non trovata'); return; }
+  const prevValue = sel.value;
+  sel.innerHTML = '<option value="">—</option>';
+  const now = new Date();
+  const latest = now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear() - 1;
+  for (let i = 0; i < 10; i++) {
+    const y = latest - i;
+    const o = document.createElement('option');
+    o.value = String(y);
+    o.textContent = String(y);
+    sel.appendChild(o);
   }
+  if (prevValue) sel.value = prevValue;
+  console.log('populateAnnataSelect: aggiunte 10 annate');
 }
 
 // ===== STATO LAVORAZIONE =====
@@ -1809,6 +1816,10 @@ function switchTab(name) {
   document.getElementById('tab-' + name).classList.remove('hidden');
   if (name === 'list')  renderList();
   if (name === 'stato') renderStato();
+  // Safety: re-popola le select chiave entrando nel tab Nuovo (in caso di stato indeterminato)
+  if (name === 'new') {
+    try { populateVinoSelect(); populateAnnataSelect(); } catch (e) { console.warn('populate fallita:', e); }
+  }
 }
 
 // ===== OP CHANGE =====
