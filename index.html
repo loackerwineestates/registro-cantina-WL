@@ -3557,6 +3557,30 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+// ---------- HELPER PERSI NEL TRONCAMENTO ----------
+function parseHl(s) {
+  if (s === '' || s == null) return 0;
+  const n = parseFloat(String(s).replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+function formatHl(n) {
+  if (n == null || n === '') return '';
+  const num = typeof n === 'number' ? n : parseFloat(String(n).replace(',', '.'));
+  if (isNaN(num)) return '';
+  let s = num.toFixed(2);
+  // rimuovo zeri finali ma tengo almeno 2 decimali → es 32.05 → "32,05", 18 → "18,00"
+  return s.replace('.', ',');
+}
+function hideEditBanner() {
+  const banner = document.getElementById('edit-banner');
+  if (banner) banner.remove();
+}
+function viewPhoto(src) {
+  const w = window.open('', '_blank');
+  if (!w) return;
+  w.document.write(`<body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;"><img src="${src}" style="max-width:100%;max-height:100%;"></body>`);
+}
+
 // ============================================================================
 // === GEOMETRIE VASCHE — motore di calcolo + sync Sheet + UI calibrazione ====
 // ============================================================================
