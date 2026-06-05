@@ -3,7 +3,7 @@
 //
 // Per aggiornare la cache dopo un cambio di codice:
 // incrementa la versione di CACHE_VERSION qui sotto.
-const CACHE_VERSION = 'rc-v7-funzioni';
+const CACHE_VERSION = 'rc-v8-cleanup';
 const CACHE_NAME = `registro-cantina-${CACHE_VERSION}`;
 
 const ASSETS_TO_CACHE = [
