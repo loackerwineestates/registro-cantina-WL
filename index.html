@@ -2357,24 +2357,28 @@ function saveEntry() {
     sent: false
   };
 
+  const wasSynced = (existingEntry && existingEntry.sent);
+
   if (isEditing) {
     // Sostituisce in place mantenendo la posizione nello storico
     const idx = entries.findIndex(e => e.id === editingEntryId);
     if (idx >= 0) entries[idx] = entry;
     else entries.unshift(entry);
-    // Se la vecchia era sincronizzata, cancella la riga corrispondente sul Sheet
-    if (existingEntry && existingEntry.sent) {
-      deleteFromSheet(editingEntryId);
-    }
     editingEntryId = null;
     hideEditBanner();
-    toast('✅ Modifica salvata — ricordati di re-inviare');
+    // NB: NIENTE deleteFromSheet. Il backend ora riconosce l'id esistente
+    // e fa UPDATE in place, mandando email "MODIFICATA" invece di "ELIMINATA".
+    toast(wasSynced ? '✅ Modifica salvata — invio in corso…' : '✅ Modifica salvata — ricordati di inviare');
   } else {
     entries.unshift(entry);
     toast('✅ Registrato!');
   }
   persist();
   resetForm();
+  // Auto-invio se era già sincronizzata (per propagare subito la modifica al Sheet)
+  if (isEditing && wasSynced && navigator.onLine !== false) {
+    setTimeout(() => { if (typeof sendToExcel === 'function') sendToExcel(); }, 300);
+  }
   setTimeout(() => switchTab('list'), 600);
 }
 
