@@ -3194,12 +3194,21 @@ function aggregaVinoDaPartenza() {
   famArr.sort((a, b) => b.totHl - a.totHl);
 
   // Step 6: costruisci stringa codice
-  // Formato: 'rappresentante1+suffisso2+suffisso3+rappresentante_fam2+...'
+  // Formato: 'dominante+suffissoStessaFam+%CodiceFam2+suffissoStessaFam+...'
+  // Dominante e sub-suffissi della sua famiglia: senza %
+  // Famiglie diverse dalla dominante: prefisso con % intero del peso sul totale
+  const totHl = enriched.reduce((s, e) => s + e.hl, 0);
   const parts = [];
+  let isFirstFamiglia = true;
   for (const fam of famArr) {
-    // Primo item = rappresentante completo
-    parts.push(fam.items[0].codice);
-    // Altri items della stessa famiglia: solo il suffisso (se famiglia condivisa) altrimenti codice intero
+    if (isFirstFamiglia) {
+      parts.push(fam.items[0].codice);
+      isFirstFamiglia = false;
+    } else {
+      const pct = totHl > 0 ? Math.round(fam.totHl / totHl * 100) : 0;
+      parts.push(pct + '%' + fam.items[0].codice);
+    }
+    // Sub-suffissi (mai con %)
     for (let i = 1; i < fam.items.length; i++) {
       const suf = getSuffissoCampo(fam.items[i].codice);
       if (suf && getFamigliaCodice(fam.items[i].codice) === fam.famiglia) {
