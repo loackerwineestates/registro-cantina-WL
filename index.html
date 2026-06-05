@@ -1898,8 +1898,14 @@ function openVascaPicker(target) {
   setTimeout(() => renderVascaFilters(), 300);
 }
 function closeVascaPicker() {
+  const wasPartenza = (pickerTarget === 'partenza');
   document.getElementById('vasca-modal').classList.remove('show');
   _pickerStateCache = null;
+  // Trigger aggregato: ricalcola vino/annata/codice quando l'utente chiude il picker partenza
+  if (wasPartenza) {
+    try { applicaAggregato(aggregaVinoDaPartenza()); }
+    catch (e) { console.warn('aggregato fallito:', e); }
+  }
 }
 
 // Helper: badge di stato riempimento per una vasca, da mostrare nel picker.
@@ -2050,11 +2056,8 @@ function toggleVasca(codice) {
       defaultQta = allocated > 0 ? formatHl(allocated) : '';
     }
     arr.push({ vasca: codice, quantita: defaultQta });
-    // Autofill vino/annata/codice + stato lavorazione quando si seleziona una vasca di partenza
-    if (pickerTarget === 'partenza') {
-      autofillFromVasca(codice);
-      autofillStatoFromVasca(codice);
-    }
+    // NB: autofill vino/annata/codice/stato è ora demandato all'AGGREGATO
+    // calcolato in closeVascaPicker (tap "Fatto") e in updateChipQta (modifica qta).
   } else {
     arr.splice(i, 1);
     // Se la partenza diventa vuota dopo la rimozione, pulisci i campi auto-compilati
@@ -2190,6 +2193,9 @@ function updateChipQta(target, idx, val) {
   if (arr[idx]) arr[idx].quantita = val;
   renderTotals();
   if (target === 'arrivo') refreshArrivoWarnings();
+  if (target === 'partenza') {
+    try { applicaAggregato(aggregaVinoDaPartenza()); } catch (e) {}
+  }
 }
 
 function normalizeChipQta(target, idx, input) {
@@ -2207,6 +2213,9 @@ function normalizeChipQta(target, idx, input) {
   arr[idx].quantita = normalized;
   renderTotals();
   if (target === 'arrivo') refreshArrivoWarnings();
+  if (target === 'partenza') {
+    try { applicaAggregato(aggregaVinoDaPartenza()); } catch (e) {}
+  }
 }
 
 function removeChip(target, code) {
@@ -3094,6 +3103,141 @@ function clearAutofilledFields() {
   lastAutofill = { vino: '', annata: '', codiceOrigine: '', statoLavorazione: '' };
   if (cleared.length) toast(`🧹 Ripuliti i campi auto: ${cleared.join(', ')}`);
 }
+
+// ============================================================================
+// === AGGREGATO MULTI-VASCA — vino/annata/codice da selectedPartenza ========
+// ============================================================================
+
+// Estrae la "famiglia" di un codice origine.
+// Logica: se gli ultimi 2 char corrispondono a una abbreviazione campo (CAMPI),
+// rimuoviamoli per ottenere il prefisso famiglia (es. 5SB1KH → 5SB1).
+// Altrimenti il codice È la famiglia (es. 4CHA).
+function getFamigliaCodice(codice) {
+  if (!codice || codice.length < 2) return codice || '';
+  const last2 = codice.slice(-2).toUpperCase();
+  const isCampoSuffix = (typeof CAMPI !== 'undefined') &&
+    CAMPI.some(c => (c.abbr || '').toUpperCase() === last2);
+  return isCampoSuffix ? codice.slice(0, -2) : codice;
+}
+function getSuffissoCampo(codice) {
+  const fam = getFamigliaCodice(codice);
+  return (fam === codice) ? '' : codice.slice(-2);
+}
+
+// Calcola l'aggregato vino/annata/codice dalla selectedPartenza corrente.
+// Ritorna { vino, annata, codiceOrigine } o null se non calcolabile.
+function aggregaVinoDaPartenza() {
+  if (!Array.isArray(selectedPartenza) || selectedPartenza.length === 0) return null;
+  // Step 1: arricchisci con state della vasca
+  const state = (typeof computeCantinaState === 'function') ? computeCantinaState().state : {};
+  const enriched = selectedPartenza.map(p => {
+    const s = state[p.vasca] || {};
+    return {
+      vasca: p.vasca,
+      hl: parseHl(p.quantita) || 0,
+      vino: s.vino || '',
+      annata: s.annata || '',
+      codice: s.codiceOrigine || ''
+    };
+  }).filter(e => e.hl > 0 && e.vino);
+
+  if (enriched.length === 0) return null;
+
+  // Step 2: vino+annata dominante (per somma hl)
+  const groupVA = new Map();   // key = "vino|annata" → hl totale
+  for (const e of enriched) {
+    const k = e.vino + '|' + e.annata;
+    groupVA.set(k, (groupVA.get(k) || 0) + e.hl);
+  }
+  let bestKey = null, bestHl = -1;
+  for (const [k, hl] of groupVA) {
+    if (hl > bestHl) { bestHl = hl; bestKey = k; }
+  }
+  const [vino, annata] = bestKey.split('|');
+
+  // Step 3: aggrega TUTTI i codici per famiglia (anche di vini non dominanti)
+  const famMap = new Map();  // famiglia → { totHl, items: [{codice, hl}] }
+  for (const e of enriched) {
+    if (!e.codice) continue;
+    const fam = getFamigliaCodice(e.codice);
+    let bucket = famMap.get(fam);
+    if (!bucket) { bucket = { totHl: 0, items: [] }; famMap.set(fam, bucket); }
+    bucket.totHl += e.hl;
+    // Trova o crea sub-item per codice esatto (somma identici)
+    let item = bucket.items.find(x => x.codice === e.codice);
+    if (!item) { item = { codice: e.codice, hl: 0 }; bucket.items.push(item); }
+    item.hl += e.hl;
+  }
+
+  // Step 4: per ogni famiglia, ordina items per hl desc → rappresentante = primo
+  const famArr = [];
+  for (const [fam, bucket] of famMap) {
+    bucket.items.sort((a, b) => b.hl - a.hl || a.codice.localeCompare(b.codice));
+    famArr.push({ famiglia: fam, totHl: bucket.totHl, items: bucket.items });
+  }
+  // Step 5: ordina famiglie per hl desc
+  famArr.sort((a, b) => b.totHl - a.totHl);
+
+  // Step 6: costruisci stringa codice
+  // Formato: 'rappresentante1+suffisso2+suffisso3+rappresentante_fam2+...'
+  const parts = [];
+  for (const fam of famArr) {
+    // Primo item = rappresentante completo
+    parts.push(fam.items[0].codice);
+    // Altri items della stessa famiglia: solo il suffisso (se famiglia condivisa) altrimenti codice intero
+    for (let i = 1; i < fam.items.length; i++) {
+      const suf = getSuffissoCampo(fam.items[i].codice);
+      if (suf && getFamigliaCodice(fam.items[i].codice) === fam.famiglia) {
+        parts.push(suf);
+      } else {
+        parts.push(fam.items[i].codice);
+      }
+    }
+  }
+  const codiceOrigine = parts.join('+');
+
+  return { vino, annata, codiceOrigine };
+}
+
+// Applica l'aggregato ai campi del form, rispettando ciò che l'utente ha modificato a mano.
+function applicaAggregato(agg) {
+  // Prima ripulisci i campi autofill non-touched (preserva input manuali)
+  clearAutofilledFields();
+  if (!agg) return;
+
+  const fVino = document.getElementById('f-vino');
+  const fAnno = document.getElementById('f-annata');
+  const fCod  = document.getElementById('f-codice');
+
+  if (fVino && agg.vino && !fVino.value) {
+    fVino.value = agg.vino;
+    lastAutofill.vino = agg.vino;
+  }
+  if (fAnno && agg.annata && !fAnno.value) {
+    fAnno.value = agg.annata;
+    lastAutofill.annata = agg.annata;
+  }
+  if (fCod && agg.codiceOrigine && !fCod.value.trim()) {
+    fCod.value = agg.codiceOrigine;
+    lastAutofill.codiceOrigine = agg.codiceOrigine;
+  }
+
+  // Riapplica anche lo stato lavorazione dalla vasca col più hl tra quelle del vino dominante
+  try {
+    const state = (typeof computeCantinaState === 'function') ? computeCantinaState().state : {};
+    let bestVasca = null, bestHl = -1;
+    for (const p of selectedPartenza) {
+      const s = state[p.vasca]; if (!s) continue;
+      if (s.vino !== agg.vino || s.annata !== agg.annata) continue;
+      const hl = parseHl(p.quantita);
+      if (hl > bestHl) { bestHl = hl; bestVasca = p.vasca; }
+    }
+    if (bestVasca && typeof autofillStatoFromVasca === 'function') {
+      autofillStatoFromVasca(bestVasca);
+    }
+  } catch (e) { console.warn('stato lavorazione aggregato:', e); }
+}
+
 
 
 // ===== CODICE ORIGINE WIZARD =====
