@@ -798,7 +798,7 @@
 
 <header>
   <h1>🍷 Registro Cantina WL</h1>
-  <div class="subtitle">Weingut Loacker · <span onclick="showDiagnostica()" style="cursor:pointer; margin-right:8px; font-size:11px; text-decoration:underline;">🔍 debug</span><span id="geom-indicator" style="font-size:11px; cursor:pointer; text-decoration:underline;" onclick="fetchGeometrieFromSheet().then(n=>{ if(n===null) toast('❌ Sync fallito - guarda la console'); else toast('📏 '+n+' geometrie caricate'); })">📏 sync…</span></div>
+  <div class="subtitle">Weingut Loacker · <span id="geom-indicator" style="font-size:11px; cursor:pointer; text-decoration:underline;" onclick="fetchGeometrieFromSheet().then(n=>{ if(n===null) toast('❌ Sync fallito - guarda la console'); else toast('📏 '+n+' geometrie caricate'); })">📏 sync…</span></div>
 </header>
 
 <div class="tabs">
