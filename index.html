@@ -973,6 +973,11 @@
       <div class="stat stat-pending"><div class="stat-num" id="stat-pending">0</div><div class="stat-lbl">Da inviare</div></div>
     </div>
     <div class="filter-bar" id="filter-bar"></div>
+    <div id="filter-date-bar" style="display:flex; align-items:center; gap:8px; margin:8px 0; padding:8px; background:#f6efe5; border-radius:8px;">
+      <label for="filter-date" style="font-size:13px; color:#6b5444; flex-shrink:0;">📅 Filtra per data:</label>
+      <input type="date" id="filter-date" onchange="setFilterDate(this.value)" style="flex:1; padding:6px; border:1px solid #d4c3b1; border-radius:6px; background:white;">
+      <button id="filter-date-clear" onclick="setFilterDate('')" style="background:none; border:1px solid #d4c3b1; border-radius:6px; padding:6px 10px; cursor:pointer; color:#8a7868;">✕</button>
+    </div>
     <div id="entries-list"></div>
   </section>
 
@@ -1383,6 +1388,7 @@ let entries = [];
 try { entries = JSON.parse(localStorage.getItem('cantina-entries') || '[]'); } catch (_) { entries = []; }
 let pendingPhotos = [];
 let currentFilter = 'all';
+let filterDate = '';
 let selectedPartenza = []; // array of vasca codes
 let selectedArrivo = [];   // array of vasca codes
 let pickerTarget = 'partenza';
@@ -3604,10 +3610,18 @@ function renderList() {
     return `<div class="${cls}" onclick="setFilter('${escapeAttr(g)}')">${label}</div>`;
   }).join('');
 
-  const filtered = currentFilter === 'all' ? entries : entries.filter(e => e.opGruppo === currentFilter);
+  // Ordinamento decrescente: data+ora più recente in alto
+  const sorted = [...entries].sort((a, b) => {
+    const da = (a.data || '') + ' ' + (a.ora || '00:00');
+    const db = (b.data || '') + ' ' + (b.ora || '00:00');
+    return db.localeCompare(da);
+  });
+  let filtered = currentFilter === 'all' ? sorted : sorted.filter(e => e.opGruppo === currentFilter);
+  if (filterDate) filtered = filtered.filter(e => e.data === filterDate);
   const list = document.getElementById('entries-list');
   if (filtered.length === 0) {
-    list.innerHTML = `<div class="empty"><div class="icon">📋</div><div>Nessuna registrazione</div></div>`;
+    const msg = filterDate ? 'Nessuna registrazione per ' + formatDate(filterDate) : 'Nessuna registrazione';
+    list.innerHTML = `<div class="empty"><div class="icon">📋</div><div>${msg}</div></div>`;
     return;
   }
   list.innerHTML = filtered.map(e => {
@@ -3657,6 +3671,12 @@ function renderList() {
   }).join('');
 }
 function setFilter(t) { currentFilter = t; renderList(); }
+function setFilterDate(v) {
+  filterDate = v || '';
+  const inp = document.getElementById('filter-date');
+  if (inp) inp.value = filterDate;
+  renderList();
+}
 function deleteEntry(id) {
   if (!confirm('Eliminare questa registrazione?')) return;
   const entry = entries.find(e => e.id === id);
