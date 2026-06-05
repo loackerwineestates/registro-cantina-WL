@@ -1,6 +1,6 @@
 {
-  "name": "Registro Cantina Loacker",
-  "short_name": "Registro Cantina",
+  "name": "Registro Cantina WL",
+  "short_name": "Registro WL",
   "description": "Registro lavori in cantina · Weingut Loacker",
   "start_url": "./",
   "scope": "./",

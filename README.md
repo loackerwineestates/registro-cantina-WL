@@ -13,11 +13,15 @@ Mobile-first PWA (Progressive Web App) che gira nel browser, installabile su iPh
 - **Registrazione operazioni** in cantina (travasi, scarichi, aggiunte, ecc.) con 32 codici operazione e 19 stati di lavorazione
 - **Picker vasche** con tutte le 193 vasche Loacker, filtri per ubicazione e tipo, badge di stato (vuota/scolma/piena)
 - **Wizard codice origine** per la composizione guidata dei codici interni Loacker
+- **Aggregato multi-vasca**: quando si scaricano più vasche, vino/annata/codice origine vengono calcolati automaticamente dal mix (dominante per quantità, codici aggregati per famiglia con percentuali)
+- **Tabella di taratura geometrica** per 56 vasche: bottone 📏 calcola altezza↔volume in tempo reale durante il carico (formule per 5 forme: cilindro verticale, parallelepipedo, cilindro orizzontale, tronco di cono verticale, cilindro semprepieno)
 - **Tab Giacenza** con stato real-time della cantina, calcolato dal log
-- **Sincronizzazione bidirezionale** con il Google Sheet condiviso
-- **Email di notifica** automatica a ogni nuova registrazione
+- **Tab Storico** con filtro per data e ordine cronologico decrescente
+- **Sincronizzazione bidirezionale** con il Google Sheet condiviso (anche cancellazioni cross-device)
+- **Email di notifica** automatica a ogni nuova registrazione e cancellazione
 - **Modifica e cancellazione** propagate al cloud
 - **Backup JSON** locale e ripristino in qualsiasi momento
+- **Indicatore sync** delle geometrie sempre visibile nell'header
 
 ## Struttura repository
 
@@ -30,7 +34,15 @@ Mobile-first PWA (Progressive Web App) che gira nel browser, installabile su iPh
 
 ## Backend
 
-Il backend è un **Google Apps Script** deployato come Web App, che riceve POST JSON dall'app e scrive sul Google Sheet "Registro Cantina WL". Sorgente del Code.gs nel Drive interno Loacker.
+Il backend è un **Google Apps Script** deployato come Web App che riceve POST JSON dall'app e scrive sul Google Sheet "Registro Cantina WL". Endpoint disponibili:
+
+- `POST /` (default) → inserisce nuove registrazioni
+- `POST { action: 'delete', ids }` → cancella per id, con email audit
+- `POST { action: 'updateGeometria', vasca, fields }` → aggiorna geometria vasca
+- `GET ?action=list` → scarica tutte le registrazioni
+- `GET ?action=geometrie` → scarica le 56 geometrie vasche
+
+Sorgente del `Code.gs` nel Drive interno Loacker, file locale `Code-WL.gs`.
 
 ## Architettura multi-cantina
 
