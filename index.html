@@ -2537,6 +2537,20 @@ async function fetchFromSheet() {
     if (!data.ok) throw new Error(data.error || 'errore lato server');
 
     const remote = Array.isArray(data.registrazioni) ? data.registrazioni : [];
+    const remoteIds = new Set(remote.map(r => r.id != null ? String(r.id) : '').filter(x => x));
+
+    // STEP 1: cancella localmente le entries SINCRONIZZATE che non sono più nel Sheet
+    // (sono state cancellate da un altro dispositivo o direttamente dal Sheet)
+    // Le draft locali (sent:false) NON vengono toccate.
+    let deleted = 0;
+    const beforeLen = entries.length;
+    entries = entries.filter(e => {
+      if (e && e.sent === true && e.id != null && !remoteIds.has(String(e.id))) {
+        deleted++;
+        return false;
+      }
+      return true;
+    });
 
     // Indice locale per id (id puo' essere number o string, normalizziamo)
     const localById = new Map();
@@ -2577,6 +2591,7 @@ async function fetchFromSheet() {
     updateLastFetchLabel();
 
     let msg = `✅ ${added} nuove · ${updated} aggiornate`;
+    if (deleted) msg += ` · ${deleted} cancellate`;
     if (skipped) msg += ` · ${skipped} draft conservati`;
     toast(msg);
   } catch (err) {
